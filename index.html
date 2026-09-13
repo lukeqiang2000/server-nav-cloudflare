@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>服务器导航面板 · v1.2</title>
-  <link rel="icon" href="resource/grassblock.webp" type="image/webp">
+  <link rel="icon" href="resources/grassblock.webp" type="image/webp">
   <style>
     :root {
       --bg-color: #0f172a;
@@ -790,28 +790,28 @@
       <div class="grid" id="gridWorld">
         <a href="" class="card" target="_blank" data-id="overworld" data-port="8080" data-path="/?world=minecraft_overworld&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'overworld')">编辑</button>
-          <div class="card-icon"><img src="resource/grassblock.webp" alt="主世界"></div>
+          <div class="card-icon"><img src="resources/grassblock.webp" alt="主世界"></div>
           <div class="card-info"><div class="card-title">主世界地图</div><div class="card-desc">Overworld Map</div></div>
           <span class="arrow">→</span>
         </a>
 
         <a href="" class="card" target="_blank" data-id="nether" data-port="8080" data-path="/?world=minecraft_the_nether&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'nether')">编辑</button>
-          <div class="card-icon"><img src="resource/netherrack.webp" alt="下界"></div>
+          <div class="card-icon"><img src="resources/netherrack.webp" alt="下界"></div>
           <div class="card-info"><div class="card-title">下界地图</div><div class="card-desc">Nether Map</div></div>
           <span class="arrow">→</span>
         </a>
 
         <a href="" class="card" target="_blank" data-id="end" data-port="8080" data-path="/?world=minecraft_the_end&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'end')">编辑</button>
-          <div class="card-icon"><img src="resource/BlockSprite_end-stone.webp" alt="末地"></div>
+          <div class="card-icon"><img src="resources/BlockSprite_end-stone.webp" alt="末地"></div>
           <div class="card-info"><div class="card-title">末地地图</div><div class="card-desc">End Map</div></div>
           <span class="arrow">→</span>
         </a>
 
         <a href="" class="card" target="_blank" data-id="transit" data-port="8888" data-path="/">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'transit')">编辑</button>
-          <div class="card-icon"><img src="resource/logo_5.png" alt="交通线路图"></div>
+          <div class="card-icon"><img src="resources/logo_5.png" alt="交通线路图"></div>
           <div class="card-info"><div class="card-title">交通线路图</div><div class="card-desc">Transit Network Map</div></div>
           <span class="arrow">→</span>
         </a>
@@ -1092,7 +1092,7 @@
         </div>
         <div class="form-group" style="margin-bottom: 16px;">
           <label>图标图片路径 (资源相对路径或图片 URL)</label>
-          <input type="text" id="editCardIcon" class="form-control" placeholder="例: resource/grassblock.webp">
+          <input type="text" id="editCardIcon" class="form-control" placeholder="例: resources/grassblock.webp">
         </div>
         <button type="submit" class="submit-btn">保存修改</button>
       </form>
