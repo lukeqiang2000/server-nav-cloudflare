@@ -1,0 +1,659 @@
+{
+  "bugs": [
+    {
+      "id": 1789139988354,
+      "name": "BRBRBR",
+      "dateTime": "2026-09-11 23:18",
+      "section": "其他 (人数)",
+      "type": "其他",
+      "detail": "疑似可口鸡排加入，名为dick的用户，明显为他，一看就是是给的",
+      "submittedAt": "2026-09-11T15:19:48.354Z",
+      "resolved": false
+    },
+    {
+      "id": 1789125894845,
+      "name": "luke",
+      "dateTime": "2026-09-11 19:24",
+      "section": "下界地图",
+      "type": "地图/数据错误",
+      "detail": "q",
+      "submittedAt": "2026-09-11T11:24:54.845Z",
+      "resolved": false
+    },
+    {
+      "id": 1789102013199,
+      "name": "luke",
+      "dateTime": "2026-09-11 12:46",
+      "section": "其他 (版本号切换语言后错乱)",
+      "type": "界面错乱",
+      "detail": "0",
+      "submittedAt": "2026-09-11T04:46:53.199Z",
+      "resolved": false
+    },
+    {
+      "id": 1789035859886,
+      "name": "luke",
+      "dateTime": "2026-09-10 18:23",
+      "section": "服务器公告",
+      "type": "界面错乱",
+      "detail": "q",
+      "submittedAt": "2026-09-10T10:24:19.886Z",
+      "resolved": true
+    },
+    {
+      "id": 1789017984850,
+      "name": "luke",
+      "dateTime": "2026-09-10 13:25",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "用户主页和群成员会全屏，用户主页应该适配屏幕，但是没有\n",
+      "submittedAt": "2026-09-10T05:26:24.850Z",
+      "resolved": false
+    },
+    {
+      "id": 1788858710378,
+      "name": "dolphins1710202",
+      "dateTime": "2026-09-08 17:10",
+      "section": "其他 (dolphins1710202)",
+      "type": "其他",
+      "detail": "dolphins1710202",
+      "submittedAt": "2026-09-08T09:11:50.378Z",
+      "resolved": true
+    },
+    {
+      "id": 1788858709781,
+      "name": "dolphins1710202",
+      "dateTime": "2026-09-08 17:10",
+      "section": "其他 (dolphins1710202)",
+      "type": "其他",
+      "detail": "dolphins1710202",
+      "submittedAt": "2026-09-08T09:11:49.781Z",
+      "resolved": true
+    },
+    {
+      "id": 1788858709368,
+      "name": "dolphins1710202",
+      "dateTime": "2026-09-08 17:10",
+      "section": "其他 (dolphins1710202)",
+      "type": "其他",
+      "detail": "dolphins1710202",
+      "submittedAt": "2026-09-08T09:11:49.368Z",
+      "resolved": true
+    },
+    {
+      "id": 1788726743927,
+      "name": "luke",
+      "dateTime": "2026-09-07 04:31",
+      "section": "在线聊天室",
+      "type": "界面错乱",
+      "detail": "查看其他用户的主页的时候会显示“退出登录”与“上传照片”“上传文件”",
+      "submittedAt": "2026-09-06T20:32:23.927Z",
+      "resolved": false
+    },
+    {
+      "id": 1788726627238,
+      "name": "luke",
+      "dateTime": "2026-09-07 04:30",
+      "section": "其他 (bug 汇报区)",
+      "type": "界面错乱",
+      "detail": "在 bug 报告中提交后游戏 id 和时间会被清空，不方便批量填写",
+      "submittedAt": "2026-09-06T20:30:27.238Z",
+      "resolved": false
+    },
+    {
+      "id": 1788726570909,
+      "name": "luke",
+      "dateTime": "2026-09-07 04:29",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "打开聊天后无法自动滚到底部",
+      "submittedAt": "2026-09-06T20:29:30.909Z",
+      "resolved": false
+    },
+    {
+      "id": 1788616864301,
+      "name": "luke",
+      "dateTime": "2026-09-05 22:00",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "后台运行无法用于ios与ipados\n",
+      "submittedAt": "2026-09-05T14:01:04.301Z",
+      "resolved": false
+    },
+    {
+      "id": 1788616752027,
+      "name": "luke",
+      "dateTime": "2026-09-05 21:58",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "后台运行功能关闭网页无法收到消息",
+      "submittedAt": "2026-09-05T13:59:12.027Z",
+      "resolved": false
+    },
+    {
+      "id": 1788616604090,
+      "name": "luke",
+      "dateTime": "2026-09-05 21:56",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "显示其他用户主页会显示退出登录与上传文件",
+      "submittedAt": "2026-09-05T13:56:44.090Z",
+      "resolved": false
+    },
+    {
+      "id": 1788580175977,
+      "name": "luke",
+      "dateTime": "2026-09-05 11:49",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "账户信息不同步",
+      "resolved": true
+    },
+    {
+      "id": 1788579597099,
+      "name": "luke",
+      "dateTime": "2026-09-05 11:39",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "chat 下载语音为 mp4",
+      "resolved": true
+    },
+    {
+      "id": 1788534021686,
+      "name": "lukepad",
+      "dateTime": "2026-09-04 22:59",
+      "section": "其他 (导航页)",
+      "type": "界面错乱",
+      "detail": "显示不了表情符号：？？",
+      "resolved": true
+    },
+    {
+      "id": 1788533326938,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:48",
+      "section": "其他 (bug汇报)",
+      "type": "功能异常",
+      "detail": "玩家名称没有跟随用户名",
+      "resolved": true
+    },
+    {
+      "id": 1788533278009,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:47",
+      "section": "其他 (bug汇报)",
+      "type": "功能异常",
+      "detail": "提交完成后时间与id会重置",
+      "resolved": true
+    },
+    {
+      "id": 1788533248109,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:47",
+      "section": "在线聊天室",
+      "type": "界面错乱",
+      "detail": "chat页面没有适配大屏幕",
+      "resolved": true
+    },
+    {
+      "id": 1788533188552,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:45",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "输入未注册的用户登录时不会报错（无反应）",
+      "resolved": true
+    },
+    {
+      "id": 1788498420851,
+      "name": "luke",
+      "dateTime": "2026-09-04 13:06",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "删除聊天记录会同步回来\n",
+      "resolved": true
+    },
+    {
+      "id": 1788498371402,
+      "name": "luke",
+      "dateTime": "2026-09-04 13:05",
+      "section": "在线聊天室",
+      "type": "其他",
+      "detail": "文件结构化混乱",
+      "resolved": true
+    },
+    {
+      "id": 1788442070989,
+      "name": "luke",
+      "dateTime": "2026-09-03 21:26",
+      "section": "其他 (账号系统)",
+      "type": "功能异常",
+      "detail": "无法同步头像与背景，重新加载照片与头像显示未上传（仅文字问题）",
+      "resolved": true
+    },
+    {
+      "id": 1788441969834,
+      "name": "luke",
+      "dateTime": "2026-09-03 21:25",
+      "section": "在线聊天室",
+      "type": "功能异常",
+      "detail": "修复无法显示离线用户",
+      "resolved": true
+    },
+    {
+      "id": 1787904965362,
+      "name": "luke",
+      "dateTime": "2026-08-28 16:14",
+      "section": "在线聊天室",
+      "type": "建议与优化",
+      "detail": "增加群聊功能，历史记录保存本地，同步数据先对比缺失部分再同步",
+      "resolved": true
+    },
+    {
+      "id": 1787904965345,
+      "name": "luke",
+      "dateTime": "2026-08-28 16:14",
+      "section": "在线聊天室",
+      "type": "建议与优化",
+      "detail": "增加群聊功能，历史记录保存本地，同步数据先对比缺失部分再同步",
+      "resolved": true
+    },
+    {
+      "id": 1787904956058,
+      "name": "luke",
+      "dateTime": "2026-08-28 16:14",
+      "section": "在线聊天室",
+      "type": "建议与优化",
+      "detail": "增加群聊功能，历史记录保存本地，同步数据先对比缺失部分再同步",
+      "resolved": true
+    },
+    {
+      "id": 1787832782922,
+      "name": "123",
+      "dateTime": "2026-08-27 20:12",
+      "section": "下界地图",
+      "type": "界面错乱",
+      "detail": "123",
+      "resolved": true
+    },
+    {
+      "id": 1787832733491,
+      "name": "65",
+      "dateTime": "2026-08-27 20:10",
+      "section": "主世界地图",
+      "type": "界面错乱",
+      "detail": "1",
+      "resolved": true
+    },
+    {
+      "id": 1787832594094,
+      "name": "65",
+      "dateTime": "2026-08-27 20:09",
+      "section": "下界地图",
+      "type": "功能异常",
+      "detail": "f",
+      "resolved": true
+    }
+  ],
+  "suggestions": [
+    {
+      "id": 1789125885591,
+      "name": "q",
+      "dateTime": "2026-09-11 19:24",
+      "section": "下界地图",
+      "priority": "低",
+      "detail": "q",
+      "status": "pending"
+    },
+    {
+      "id": 1789125859145,
+      "name": "luke",
+      "dateTime": "2026-09-11 19:24",
+      "section": "主世界地图",
+      "priority": "低",
+      "detail": "w",
+      "status": "pending"
+    },
+    {
+      "id": 1788726664678,
+      "name": "luke",
+      "dateTime": "2026-09-07 04:30",
+      "section": "资源下载",
+      "priority": "中",
+      "detail": "点歌区（私密室与公共区）",
+      "status": "rejected"
+    },
+    {
+      "id": 1788702883278,
+      "name": "luke",
+      "dateTime": "2026-09-06 21:54",
+      "section": "整体体验",
+      "priority": "紧急",
+      "detail": "自动同步模组变更，进入导航页显示弹窗并提供下载链接",
+      "status": "rejected"
+    },
+    {
+      "id": 1788533703560,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:54",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "增大按钮\n",
+      "status": "accepted"
+    },
+    {
+      "id": 1788533685608,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:54",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "动画",
+      "status": "accepted"
+    },
+    {
+      "id": 1788533667252,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:54",
+      "section": "整体体验",
+      "priority": "中",
+      "detail": "图形化编辑ui\n",
+      "status": "rejected"
+    },
+    {
+      "id": 1788533648848,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:53",
+      "section": "整体体验",
+      "priority": "低",
+      "detail": "多语言",
+      "status": "accepted"
+    },
+    {
+      "id": 1788533633308,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:53",
+      "section": "其他 (新增)",
+      "priority": "低",
+      "detail": "小游戏合集",
+      "status": "pending"
+    },
+    {
+      "id": 1788533607958,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:53",
+      "section": "整体体验",
+      "priority": "中",
+      "detail": "合并joinfriends.top\n",
+      "status": "pending"
+    },
+    {
+      "id": 1788533578776,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:52",
+      "section": "资源下载",
+      "priority": "中",
+      "detail": "webdav\n",
+      "status": "accepted"
+    },
+    {
+      "id": 1788533561964,
+      "name": "luke",
+      "dateTime": "2026-09-04 22:51",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "输入@建议用户，右键消息显示右键菜单（引用、删除、@。类似微信）",
+      "status": "accepted"
+    },
+    {
+      "id": 1788469063816,
+      "name": "luke",
+      "dateTime": "2026-09-04 04:55",
+      "section": "在线聊天室",
+      "priority": "紧急",
+      "detail": "在大厅下方添加打电话按钮与用户列表选择打电话",
+      "status": "accepted"
+    },
+    {
+      "id": 1788444356755,
+      "name": "luke",
+      "dateTime": "2026-09-03 22:05",
+      "section": "在线聊天室",
+      "priority": "紧急",
+      "detail": "私聊提示",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411701011,
+      "name": "luke",
+      "dateTime": "2026-09-03 13:00",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "把所有用户选择改为用户列表，在群成员显示离线用户",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411641541,
+      "name": "luke",
+      "dateTime": "2026-09-03 13:00",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "chat 预览与下载按钮",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411604732,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:59",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "更多动画",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411584909,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:59",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "多选",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411565004,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:58",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "图形化编写",
+      "status": "rejected"
+    },
+    {
+      "id": 1788411503587,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:58",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "主页提示",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411483380,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:57",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "后台运行",
+      "status": "accepted"
+    },
+    {
+      "id": 1788411451757,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:57",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "多语言支持",
+      "status": "rejected"
+    },
+    {
+      "id": 1788411427836,
+      "name": "luke",
+      "dateTime": "2026-09-03 12:56",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "完善账户系统",
+      "status": "accepted"
+    },
+    {
+      "id": 1788356660614,
+      "name": "luke",
+      "dateTime": "2026-09-02 21:44",
+      "section": "整体体验",
+      "priority": "低",
+      "detail": "sb\n",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976001,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "其他 (导航页)",
+      "priority": "高",
+      "detail": "新增“汇报与建议”板块，整合 Bug 汇报与建议功能，并支持多选板块。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976002,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "增加通话画中画小窗：浏览器退到主页或最小化时通话不中断；多人通话显示当前发言人，单人通话显示对方画面。",
+      "status": "pending"
+    },
+    {
+      "id": 1788904976003,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "其他 (导航页)",
+      "priority": "高",
+      "detail": "为管理员增加导航页图形化板块编辑器，可自定义图标、图片、emoji、名称、简介和链接，并选择板块插入位置；配置需要永久保存。",
+      "status": "pending"
+    },
+    {
+      "id": 1788904976004,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "增加聊天上线与离线提示，显示具体用户并写入历史聊天记录，支持多端同步。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976005,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "在线聊天室",
+      "priority": "中",
+      "detail": "消息多选时点击消息本体即可选择，不再要求点击选择框或窗口。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976006,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "MC board",
+      "priority": "中",
+      "detail": "增加白板和黑板，支持涂鸦、橡皮擦、一键清除和新建画板。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976007,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "其他 (导航页)",
+      "priority": "中",
+      "detail": "导航页新增“网站合集”和“文件格式转换区”，文件格式转换区支持多种格式。",
+      "status": "pending"
+    },
+    {
+      "id": 1788904976008,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "在线聊天室",
+      "priority": "紧急",
+      "detail": "新增会议功能，支持共享屏幕、投票和沿用原聊天架构的会议聊天；聊天模式支持公共聊天、私聊、群聊和会议聊天群。",
+      "status": "rejected"
+    },
+    {
+      "id": 1788904976009,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "视频会议沿用原聊天区的视频能力，包括降噪和摄像头切换；摄像头及麦克风设备少于或等于两个时直接切换，超过两个时显示设备列表供选择。",
+      "status": "rejected"
+    },
+    {
+      "id": 1788904976010,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "资源下载",
+      "priority": "高",
+      "detail": "修复资源下载中心下载图片、视频等文件时被浏览器预览打开而不是实际下载的问题。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976011,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "其他 (bug 汇报区)",
+      "priority": "中",
+      "detail": "管理员可一键复制 Bug 列表和建议列表，也可仅复制建议列表内容。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976012,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "在线聊天室",
+      "priority": "高",
+      "detail": "聊天区新增用户侧边栏：支持搜索用户主页、打电话、私聊和已加入群聊搜索；电脑端和 iPad 默认展开，手机端默认折叠，并移除聊天框下方的用户列表按钮。",
+      "status": "accepted"
+    },
+    {
+      "id": 1788904976013,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "音乐播放器",
+      "priority": "中",
+      "detail": "新建 Music 音乐播放器网页并运行于 6767 端口：支持线上 MP3/FLAC 播放、图片和 .lrc 歌词展示、客户端音响切换（两个直接切换，超过两个显示列表）以及显示一起听音乐的人。",
+      "status": "pending"
+    },
+    {
+      "id": 1788904976014,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "电影播放",
+      "priority": "中",
+      "detail": "新建 Movie 网页并运行于 9191 端口，从 D:\\videos 选择视频一起观看；显示观看人数，支持本地保存带时间的弹幕并发送弹幕。",
+      "status": "pending"
+    },
+    {
+      "id": 1788904976015,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "直播",
+      "priority": "高",
+      "detail": "新建英文命名的 Live 页面并运行于 7878 端口：支持不限设备开启直播、共享主机屏幕分辨率与刷新率、观看方调节观看分辨率与刷新率及常规聊天。",
+      "status": "pending"
+    },
+    {
+      "id": 1788904976016,
+      "name": "luke",
+      "dateTime": "2026-09-08 06:02",
+      "section": "整体体验",
+      "priority": "高",
+      "detail": "Music、Movie、Live 与导航页共享账号和资源，打开页面时同步用户头像及主页地址；各网页支持 HTTPS，证书放在 web 文件目录（如 music/cert）。",
+      "status": "pending"
+    }
+  ]
+}

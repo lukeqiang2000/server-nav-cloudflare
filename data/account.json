@@ -1,0 +1,491 @@
+{
+  "version": 1,
+  "chat_store": {
+    "groupMessages": {
+      "lobby": [
+        {
+          "msgId": "system_online_1789128610155_f2u4f",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "20:10",
+          "timestamp": 1789128610166
+        },
+        {
+          "msgId": "system_offline_1789128610324_wu3f1",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "20:10",
+          "timestamp": 1789128610325
+        },
+        {
+          "msgId": "system_online_1789128618269_6brr9",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "20:10",
+          "timestamp": 1789128618270
+        },
+        {
+          "msgId": "system_offline_1789128625524_gtrez",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "20:10",
+          "timestamp": 1789128625525
+        },
+        {
+          "msgId": "system_online_1789128629610_s335n",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "20:10",
+          "timestamp": 1789128629610
+        },
+        {
+          "msgId": "system_offline_1789128630904_rqcgl",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "20:10",
+          "timestamp": 1789128630904
+        },
+        {
+          "msgId": "system_online_1789152533187_kw278",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "02:48",
+          "timestamp": 1789152533195
+        },
+        {
+          "msgId": "gmsg_1789152571273_ynz8c",
+          "roomId": "lobby",
+          "type": "text",
+          "userId": "mtk5nnmx15af4cd2",
+          "username": "luke",
+          "avatar": "/uploads/1788612106440_f932e29bbbf946a8.JPEG",
+          "text": "%40BRBRBR%20%E6%80%8E%E4%B9%88%E9%80%80%E4%BA%86",
+          "fileName": "",
+          "fileSize": 0,
+          "fileData": null,
+          "fileUrl": null,
+          "quote": null,
+          "time": "02:49",
+          "timestamp": 1789152571273
+        },
+        {
+          "msgId": "system_offline_1789152574015_izkek",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "02:49",
+          "timestamp": 1789152574015
+        },
+        {
+          "msgId": "system_online_1789155700880_afcbh",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "03:41",
+          "timestamp": 1789155700931
+        },
+        {
+          "msgId": "system_offline_1789155712429_isjb6",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "03:41",
+          "timestamp": 1789155712434
+        },
+        {
+          "msgId": "system_online_1789155846514_f8aod",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "03:44",
+          "timestamp": 1789155846546
+        },
+        {
+          "msgId": "system_offline_1789155891499_p3ilr",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "03:44",
+          "timestamp": 1789155891500
+        },
+        {
+          "msgId": "system_online_1789198098881_si4rc",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "15:28",
+          "timestamp": 1789198098894
+        },
+        {
+          "msgId": "system_offline_1789198103146_25rn6",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "15:28",
+          "timestamp": 1789198103146
+        },
+        {
+          "msgId": "system_online_1789198110751_wdsdw",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "15:28",
+          "timestamp": 1789198110752
+        },
+        {
+          "msgId": "system_offline_1789198111009_4dk2h",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "15:28",
+          "timestamp": 1789198111009
+        },
+        {
+          "msgId": "system_online_1789198111175_0dai0",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "15:28",
+          "timestamp": 1789198111175
+        },
+        {
+          "msgId": "system_offline_1789198115113_iudlq",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "15:28",
+          "timestamp": 1789198115113
+        },
+        {
+          "msgId": "system_online_1789198116098_5p709",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "15:28",
+          "timestamp": 1789198116098
+        },
+        {
+          "msgId": "system_offline_1789198121372_54laj",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "15:28",
+          "timestamp": 1789198121372
+        },
+        {
+          "msgId": "system_online_1789199144133_pf16j",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "15:45",
+          "timestamp": 1789199144147
+        },
+        {
+          "msgId": "system_offline_1789199151116_lwjd3",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "15:45",
+          "timestamp": 1789199151117
+        },
+        {
+          "msgId": "system_online_1789201794706_yc0l5",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "16:29",
+          "timestamp": 1789201794783
+        },
+        {
+          "msgId": "system_offline_1789201801018_gcy4q",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "16:30",
+          "timestamp": 1789201801019
+        },
+        {
+          "msgId": "system_online_1789256848771_oiked",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "07:47",
+          "timestamp": 1789256848870
+        },
+        {
+          "msgId": "system_online_1789323303030_tz8ja",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "02:15",
+          "timestamp": 1789323303040
+        },
+        {
+          "msgId": "system_offline_1789323361487_7rm9u",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "02:16",
+          "timestamp": 1789323361487
+        },
+        {
+          "msgId": "system_online_1789324779990_skhbs",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "02:39",
+          "timestamp": 1789324779999
+        },
+        {
+          "msgId": "system_offline_1789324820132_awj3m",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "02:40",
+          "timestamp": 1789324820132
+        },
+        {
+          "msgId": "system_online_1789325171012_x1ntp",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "02:46",
+          "timestamp": 1789325171029
+        },
+        {
+          "msgId": "system_online_1789325230842_z8jjc",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "02:47",
+          "timestamp": 1789325230853
+        },
+        {
+          "msgId": "system_offline_1789325236995_ywt3u",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "02:47",
+          "timestamp": 1789325236995
+        },
+        {
+          "msgId": "system_online_1789325237172_ra8i4",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "02:47",
+          "timestamp": 1789325237172
+        },
+        {
+          "msgId": "system_offline_1789325241922_p3yn9",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "02:47",
+          "timestamp": 1789325241923
+        },
+        {
+          "msgId": "system_online_1789326171811_azw95",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 上线了",
+          "time": "03:02",
+          "timestamp": 1789326171811
+        },
+        {
+          "msgId": "system_offline_1789326174112_giis4",
+          "roomId": "lobby",
+          "type": "system",
+          "username": "系统",
+          "text": "luke 下线了",
+          "time": "03:02",
+          "timestamp": 1789326174112
+        }
+      ]
+    },
+    "privateMessages": {},
+    "groupMembers": {
+      "1": [
+        "luke"
+      ],
+      "lobby": [
+        "luke",
+        "lukepad",
+        "BRBRBR",
+        "lukesafari",
+        "AAAAAA",
+        "lukedesktop"
+      ]
+    },
+    "registeredUsers": {
+      "user_1787917152333_9664": {
+        "username": "lukephone",
+        "createdAt": 1787917152333
+      },
+      "user_1787918990534_7439": {
+        "username": "luke_desktop",
+        "createdAt": 1787918990534,
+        "deviceUUID": "device_m6ig68yz5_1788383682871"
+      },
+      "user_1787919267973_8062": {
+        "username": "勇敢兔子720",
+        "createdAt": 1787919267973
+      },
+      "user_1787920095048_7316": {
+        "username": "快乐兔子55",
+        "createdAt": 1787920095048
+      },
+      "user_1787930807224_2260": {
+        "username": "luke",
+        "createdAt": 1787930807224,
+        "deviceUUID": "device_eic93xtpb_1788383635968"
+      },
+      "user_1787936714624_2995": {
+        "username": "BRBRBR",
+        "createdAt": 1787936714625
+      },
+      "user_1787938991115_5400": {
+        "username": "帅气兔子196",
+        "createdAt": 1787938991115
+      },
+      "user_1787992373927_4076": {
+        "username": "hnsnxc",
+        "createdAt": 1787992373928
+      },
+      "user_1788095345503_1818": {
+        "username": "Luke的妈妈",
+        "createdAt": 1788095345503
+      },
+      "user_1788145558187_9310": {
+        "username": "zhangyiming",
+        "createdAt": 1788145558192
+      },
+      "device_m6ig68yz5_1788383682871": {
+        "userId": "device_m6ig68yz5_1788383682871",
+        "username": "聪明兔子662",
+        "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=device_m6ig68yz5_1788383682871",
+        "deviceUUID": "device_m6ig68yz5_1788383682871",
+        "createdAt": 1788386249245
+      },
+      "user_1788436785767_8336": {
+        "userId": "user_1788436785767_8336",
+        "username": "勇敢小猫820",
+        "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=device_xqj62h3q4_1788436793625",
+        "deviceUUID": "device_xqj62h3q4_1788436793625",
+        "createdAt": 1788436785767
+      }
+    },
+    "users": {},
+    "usernameToId": {},
+    "sessions": {}
+  },
+  "users": [
+    {
+      "id": "mu04peto9fe1c56e",
+      "username": "chatdebug193750932",
+      "passwordHash": "311f8c26fd0ab0e4c281a1cd82eebfa333f938310f47a9d16ac8645ebb17fee0",
+      "displayName": "chatdebug193750932",
+      "avatar": "/uploads/default_avatar.png",
+      "background": "/uploads/default_bg.png",
+      "bio": "这个人很懒，什么都没有写~ &#128522;",
+      "createdAt": "2026-09-13T18:09:44.268Z",
+      "lastActive": "2026-09-13T18:09:44.268Z"
+    },
+    {
+      "id": "mu04qhlq04b4e78a",
+      "username": "chatfix1810923467",
+      "passwordHash": "311f8c26fd0ab0e4c281a1cd82eebfa333f938310f47a9d16ac8645ebb17fee0",
+      "displayName": "chatfix1810923467",
+      "avatar": "/uploads/default_avatar.png",
+      "background": "/uploads/default_bg.png",
+      "bio": "这个人很懒，什么都没有写~ &#128522;",
+      "createdAt": "2026-09-13T18:10:34.526Z",
+      "lastActive": "2026-09-13T18:10:34.526Z"
+    },
+    {
+      "id": "mu04w8qoff252903",
+      "username": "luke",
+      "passwordHash": "e2d52c81286e801369c65878009ced56e62e473d0c4b4ff9239381dfa8f9ed30",
+      "displayName": "luke",
+      "avatar": "/uploads/file-1789323347778-483271687.jpeg",
+      "background": "/uploads/default_bg.png",
+      "bio": "这个人很懒，什么都没有写~ &#128522;",
+      "createdAt": "2026-09-13T18:15:02.976Z",
+      "lastActive": "2026-09-13T18:46:10.968Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "5b0208d2049b13fc32207f942941b103bb474effdd8140b8cb096020cfb5b548",
+      "userId": "mu04peto9fe1c56e",
+      "createdAt": 1789322984270,
+      "expiresAt": 1791914984270
+    },
+    {
+      "token": "e278f0332e635319cdc1694e01b28e9ef0d6315b4367c55ce3dd0793b6aa583a",
+      "userId": "mu04qhlq04b4e78a",
+      "createdAt": 1789323034530,
+      "expiresAt": 1791915034530
+    },
+    {
+      "token": "4417747a704656886212fbc0b85418b542a0d30227257b72263ae0baa1ec6dac",
+      "userId": "mu04w8qoff252903",
+      "createdAt": 1789323302978,
+      "expiresAt": 1791915302978
+    },
+    {
+      "token": "78cc3183cfa2428a70dfd6c31131ec47ab7cadfdfd0e27d293d982013647e7ca",
+      "userId": "mu04w8qoff252903",
+      "createdAt": 1789323311304,
+      "expiresAt": 1791915311304
+    },
+    {
+      "token": "ad13a3e675ccff16477fccd21cf24724a109c3e035645cac2f7051ea96abb928",
+      "userId": "mu04w8qoff252903",
+      "createdAt": 1789325170970,
+      "expiresAt": 1791917170970
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "_order": [
+    "overworld",
+    "nether",
+    "end",
+    "transit"
+  ],
+  "nether": {
+    "title": "下界地图",
+    "desc": "Nether Map",
+    "url": "http://luke:8080/?world=minecraft_the_nether&zoom=4&x=0&z=0",
+    "icon": "resource/netherrack.webp"
+  },
+  "end": {
+    "title": "末地地图",
+    "desc": "End Map",
+    "url": "http://luke:8080/?world=minecraft_the_end&zoom=4&x=0&z=0",
+    "icon": "resource/BlockSprite_end-stone.webp"
+  },
+  "transit": {
+    "title": "交通线路图",
+    "desc": "Transit Network Map",
+    "url": "http://luke:8888/",
+    "icon": "resource/logo_5.png"
+  },
+  "overworld": {
+    "title": "主世界地图",
+    "desc": "Overworld Map",
+    "url": "http://luke:8080/?world=minecraft_overworld&zoom=4&x=0&z=0",
+    "icon": "resource/grassblock.webp"
+  }
+}

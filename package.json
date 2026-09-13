@@ -1,0 +1,23 @@
+{
+  "name": "webserve",
+  "version": "1.2.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.3.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "ftp-srv": "^4.6.3",
+    "multer": "^2.3.0",
+    "socket.io": "^4.8.3"
+  }
+}

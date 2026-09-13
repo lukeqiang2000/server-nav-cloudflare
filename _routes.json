@@ -1,5 +1,12 @@
 {
   "version": 1,
   "include": ["/api/*"],
-  "exclude": ["/resource/*"]
+  "exclude": [
+    "/resource/grassblock.webp",
+    "/resource/netherrack.webp",
+    "/resource/BlockSprite_end-stone.webp",
+    "/resource/logo_5.png",
+    "/resource/opanel.png",
+    "/favicon.ico"
+  ]
 }
