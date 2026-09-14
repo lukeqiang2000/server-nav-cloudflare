@@ -101,6 +101,10 @@ async function handleRequest(request, env) {
     if (path === 'file/batch-delete' && method === 'POST') return handleFileBatchDelete(request, env);
     if (path === 'file/rename' && method === 'POST') return handleFileRename(request, env);
     if (path === 'file/batch-download' && method === 'POST') return handleFileBatchDownload(request, env);
+    if (path === 'folder/create' && method === 'POST') return handleFolderCreate(request, env);
+    if (path === 'folder/delete' && method === 'POST') return handleFolderDelete(request, env);
+    if (path === 'folder/rename' && method === 'POST') return handleFolderRename(request, env);
+    if (path === 'folder/verify' && method === 'POST') return handleFolderVerify(request, env);
     if (path.startsWith('files/') && method === 'GET') return handleFileGet(request, env, path, url);
 
     // 聊天室
@@ -565,15 +569,19 @@ async function handleDownloadList(env) {
   const files = list.objects.map(item => {
     const rawName = item.key.replace(/^files\//, '');
     const name = rawName.replace(/^\d+_[a-f0-9]+_/, '');
+    if (rawName.startsWith('.folders/')) return null;
     return {
       key: item.key,
       name: name || rawName,
       size: item.size,
       uploaded: item.uploaded ? item.uploaded.toISOString() : new Date().toISOString()
     };
-  });
+  }).filter(Boolean);
+  const folders = list.objects
+    .filter(item => item.key.startsWith('files/.folders/'))
+    .map(item => decodeURIComponent(item.key.slice('files/.folders/'.length)));
   files.sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded));
-  return json({ files });
+  return json({ files, folders });
 }
 
 async function handleDownloadUpload(request, env) {
@@ -587,7 +595,9 @@ async function handleDownloadUpload(request, env) {
   for (const file of files) {
     if (typeof file === 'string') continue;
     const safeName = (file.name || 'file').replace(/[^a-zA-Z0-9._\-\u4e00-\u9fa5]/g, '_');
-    const key = 'files/' + Date.now() + '_' + Math.random().toString(16).slice(2, 10) + '_' + safeName;
+    const relPath = String(form.get('relPath') || '').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+    if (relPath.includes('..')) return json({ error: '非法目录' }, 400);
+    const key = 'files/' + (relPath ? `${relPath}/` : '') + Date.now() + '_' + Math.random().toString(16).slice(2, 10) + '_' + safeName;
     await bucket.put(key, await file.arrayBuffer(), {
       httpMetadata: { contentType: file.type || 'application/octet-stream' }
     });
@@ -669,6 +679,82 @@ async function handleFileRename(request, env) {
 async function handleFileBatchDownload(request, env) {
   if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
   return json({ error: 'Cloudflare 版本暂不支持打包下载，请逐个下载文件' }, 501);
+}
+
+function normalizeFolderKey(value) {
+  const key = String(value || '').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+  if (!key || key.includes('..') || key.startsWith('shared/')) return '';
+  return key;
+}
+
+async function handleFolderCreate(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const parent = normalizeFolderKey(body.relPath);
+  const name = String(body.folderName || '').trim();
+  if (!name || name.includes('/') || name.includes('\\') || name.includes('..')) {
+    return json({ error: '非法文件夹名称' }, 400);
+  }
+  const key = [parent, name].filter(Boolean).join('/');
+  await bucket.put(`files/.folders/${encodeURIComponent(key)}`, JSON.stringify({
+    key, private: Boolean(body.isPrivate), password: String(body.password || '')
+  }), { httpMetadata: { contentType: 'application/json' } });
+  return json({ success: true, key });
+}
+
+async function handleFolderDelete(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const folder = normalizeFolderKey(body.folderKey);
+  if (!folder) return json({ error: '非法文件夹路径' }, 400);
+  const prefix = `files/${folder}/`;
+  const objects = await bucket.list({ prefix });
+  await bucket.delete(objects.objects.map(object => object.key));
+  await bucket.delete(`files/.folders/${encodeURIComponent(folder)}`);
+  return json({ success: true });
+}
+
+async function handleFolderRename(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const oldKey = normalizeFolderKey(body.folderKey);
+  const newName = String(body.newName || '').trim();
+  if (!oldKey || !newName || newName.includes('/') || newName.includes('\\') || newName.includes('..')) {
+    return json({ error: '非法文件夹名称' }, 400);
+  }
+  const parent = oldKey.includes('/') ? oldKey.slice(0, oldKey.lastIndexOf('/')) : '';
+  const newKey = [parent, newName].filter(Boolean).join('/');
+  const objects = await bucket.list({ prefix: `files/${oldKey}/` });
+  for (const object of objects.objects) {
+    const source = await bucket.get(object.key);
+    if (source) await bucket.put(`files/${newKey}/${object.key.slice(`files/${oldKey}/`.length)}`, source.body, { httpMetadata: source.httpMetadata });
+  }
+  await bucket.delete(objects.objects.map(object => object.key));
+  await bucket.delete(`files/.folders/${encodeURIComponent(oldKey)}`);
+  await bucket.put(`files/.folders/${encodeURIComponent(newKey)}`, JSON.stringify({ key: newKey }), {
+    httpMetadata: { contentType: 'application/json' }
+  });
+  return json({ success: true, key: newKey });
+}
+
+async function handleFolderVerify(request, env) {
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const key = normalizeFolderKey(body.folderKey);
+  const object = key ? await bucket.get(`files/.folders/${encodeURIComponent(key)}`) : null;
+  if (!object) return json({ error: '文件夹不存在' }, 404);
+  const data = await object.json();
+  if (data.private && String(body.password || '') !== String(data.password || '')) {
+    return json({ error: '密码错误！' }, 403);
+  }
+  return json({ success: true });
 }
 
 /* ================= 聊天室 ================= */
