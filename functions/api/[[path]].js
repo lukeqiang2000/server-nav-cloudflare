@@ -46,6 +46,9 @@ async function handleRequest(request, env) {
     }
 
     if ((path === 'login' || path === 'admin/login') && method === 'POST') return handleAdminLogin(request, env);
+    if (path === 'admin/me' && method === 'GET') {
+      return json({ authenticated: await requireAdmin(request, env) });
+    }
 
     if (!getKV(env)) {
       return json({ error: '未绑定 KV 命名空间 NAV_KV 或 MY_KV' }, 500);

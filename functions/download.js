@@ -17,8 +17,15 @@ window.addEventListener('load', () => {
       });
     }
   };
-  apply();
-  setTimeout(apply, 0);
+  fetch('/api/admin/me', { credentials: 'include', cache: 'no-store' })
+    .then(response => response.ok ? response.json() : { authenticated: false })
+    .then(result => {
+      if (result.authenticated) sessionStorage.setItem('isAdmin', 'true');
+      else sessionStorage.removeItem('isAdmin');
+      apply();
+    })
+    .catch(() => apply());
+  if (typeof checkUserSession === 'function') checkUserSession();
 });
 </script>`;
 
