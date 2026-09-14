@@ -111,8 +111,11 @@ async function handleRequest(request, env) {
     if (path.startsWith('files/') && method === 'GET') return handleFileGet(request, env, path, url);
 
     // 聊天室
-    if (path === 'chat/messages' && method === 'GET') return handleChatGet(env, url);
+    if (path === 'chat/messages' && method === 'GET') return handleChatGet(request, env, url);
     if (path === 'chat/messages' && method === 'POST') return handleChatPost(request, env);
+    if (path === 'chat/users' && method === 'GET') return handleChatUsers(env);
+    if (path === 'chat/events' && method === 'GET') return handleChatEvents(request, env, url);
+    if (path === 'chat/events' && method === 'POST') return handleChatEventPost(request, env);
 
     if (path === 'auth/register' && method === 'POST') return handleAuthRegister(request, env);
     if (path === 'auth/login' && method === 'POST') return handleAuthLogin(request, env);
@@ -785,11 +788,14 @@ async function handleFolderVerify(request, env) {
 
 const CHAT_MAX_MESSAGES = 100;
 const CHAT_KEY = 'chat:messages';
+const CHAT_EVENTS_KEY = 'chat:events';
 
-async function handleChatGet(env, url) {
+async function handleChatGet(request, env, url) {
   const since = parseInt(url.searchParams.get('since') || '0', 10) || 0;
   const messages = await getJSON(env, CHAT_KEY, []);
-  const filtered = since > 0 ? messages.filter(m => m.timestamp > since) : messages.slice(-50);
+  const user = await getCurrentUser(request, env);
+  const filtered = (since > 0 ? messages.filter(m => m.timestamp > since) : messages.slice(-50))
+    .filter(m => !m.private || (user && (m.userId === user.id || m.targetUserId === user.id)));
   return json({ messages: filtered });
 }
 
@@ -799,6 +805,10 @@ async function handleChatPost(request, env) {
   const body = await request.json().catch(() => ({}));
   const text = String(body.text || '').trim().slice(0, 500);
   if (!text) return json({ error: '消息不能为空' }, 400);
+  const targetUserId = String(body.targetUserId || '').trim();
+  const targetUsername = String(body.target || body.targetUsername || '').trim();
+  const target = targetUserId || targetUsername ? await getUserById(env, targetUserId) || await getUserByUsername(env, targetUsername) : null;
+  if ((targetUserId || targetUsername) && !target) return json({ error: '目标用户不存在' }, 404);
   const messages = await getJSON(env, CHAT_KEY, []);
   const msg = {
     id: randomId(),
@@ -806,12 +816,47 @@ async function handleChatPost(request, env) {
     username: user.displayName || user.username,
     avatar: user.avatar || '/api/uploads/default_avatar.png',
     text,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    private: Boolean(target),
+    targetUserId: target?.id || '',
+    targetUsername: target?.username || ''
   };
   messages.push(msg);
   if (messages.length > CHAT_MAX_MESSAGES) messages.splice(0, messages.length - CHAT_MAX_MESSAGES);
   await putJSON(env, CHAT_KEY, messages);
   return json({ success: true, message: msg });
+}
+
+async function handleChatUsers(env) {
+  const list = await getKV(env).list({ prefix: 'user:' });
+  const users = [];
+  for (const key of list.keys) {
+    if (key.name.startsWith('user:name:')) continue;
+    const user = await getKV(env).get(key.name, { type: 'json' });
+    if (user) users.push(publicUser(user));
+  }
+  return json({ users });
+}
+
+async function handleChatEvents(request, env, url) {
+  const user = await getCurrentUser(request, env);
+  if (!user) return json({ error: '请先登录' }, 401);
+  const since = Number(url.searchParams.get('since') || 0);
+  const events = await getJSON(env, CHAT_EVENTS_KEY, []);
+  return json({ events: events.filter(event => event.timestamp > since && (!event.target || event.target === user.username || event.target === user.id)) });
+}
+
+async function handleChatEventPost(request, env) {
+  const user = await getCurrentUser(request, env);
+  if (!user) return json({ error: '请先登录' }, 401);
+  const body = await request.json().catch(() => ({}));
+  const type = String(body.type || '').trim();
+  if (!type) return json({ error: '事件类型不能为空' }, 400);
+  const events = await getJSON(env, CHAT_EVENTS_KEY, []);
+  events.push({ ...body, type, from: body.from || user.username, timestamp: Date.now() });
+  if (events.length > 200) events.splice(0, events.length - 200);
+  await putJSON(env, CHAT_EVENTS_KEY, events);
+  return json({ success: true });
 }
 
 /* ================= 用户认证 ================= */
