@@ -1,191 +1,2503 @@
-# 自动推送.ps1
-Set-Location -Path $PSScriptRoot
-
-# ========== 配置 ==========
-# 推送成功后自动打开的页面（Cloudflare Pages 项目地址）
-$CF_URL = "https://dash.cloudflare.com/eecbc277b5e57bd77a4f2720318478b8/pages/view/dolphinserver"
-
-# 是否推送成功后自动打开浏览器
-# 1 = 自动打开，0 = 询问后打开
-$AUTO_OPEN = 1
-
-# 要自动屏蔽的文件（不会被提交到 Git）
-# 支持通配符，相对于当前目录
-$IGNORE_PATTERNS = @(
-    "自动推送.bat",
-    "自动推送.ps1",
-    "git_push.ps1",
-    "*.bat",
-    "*.ps1",
-    "node_modules/",
-    "server.js",
-    "package.json",
-    "package-lock.json",
-    "cert/",
-    "data/",
-    ".env",
-    "*.log"
-)
-# ==========================
-
-Write-Host ""
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "   Git 自动检测并推送" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    Write-Host "[错误] 未检测到 git 命令。" -ForegroundColor Red
-    Write-Host "请先安装 Git for Windows: https://git-scm.com/download/win"
-    Read-Host "按回车退出"
-    exit 1
-}
-
-$isRepo = git rev-parse --is-inside-work-tree 2>$null
-if ($LASTEXITCODE -ne 0 -or $isRepo -ne 'true') {
-    Write-Host "[错误] 当前目录不是 Git 仓库。" -ForegroundColor Red
-    Read-Host "按回车退出"
-    exit 1
-}
-
-Write-Host "[路径] $PWD" -ForegroundColor Yellow
-
-# ========== 自动屏蔽自身 ==========
-Write-Host "[屏蔽] 更新 .gitignore ..." -ForegroundColor Yellow
-
-$gitignorePath = Join-Path $PWD ".gitignore"
-$existingLines = @()
-if (Test-Path $gitignorePath) {
-    $existingLines = Get-Content $gitignorePath -ErrorAction SilentlyContinue
-}
-$existingLines = $existingLines | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
-
-$newLines = @()
-$addedCount = 0
-foreach ($pattern in $IGNORE_PATTERNS) {
-    if (-not $existingLines.Contains($pattern)) {
-        $newLines += $pattern
-        $addedCount++
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>服务器导航面板 · v1.2</title>
+  <link rel="icon" href="resource/grassblock.webp" type="image/webp">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-hover: #818cf8;
+      --input-bg: rgba(15, 23, 42, 0.6);
+      --danger-color: #ef4444;
+      --success-color: #10b981;
+      --suggestion-color: #f59e0b;
     }
-}
 
-if ($addedCount -gt 0) {
-    $allLines = $existingLines + $newLines
-    $allLines | Out-File -FilePath $gitignorePath -Encoding utf8NoBOM
-    Write-Host "  已添加 $addedCount 条忽略规则" -ForegroundColor DarkGray
-} else {
-    Write-Host "  忽略规则已存在，无需更新" -ForegroundColor DarkGray
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
 
-# 如果被忽略的文件已经被 Git 追踪，从索引移除（本地文件保留）
-$trackedFiles = git ls-files
-$toRemove = @()
-foreach ($file in $trackedFiles) {
-    foreach ($pattern in $IGNORE_PATTERNS) {
-        if ($file -like $pattern -or $file -like ($pattern.TrimEnd('/') + "/*")) {
-            $toRemove += $file
-            break
+    body {
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 24px 24px 24px;
+      color: var(--text-main);
+    }
+
+    .top-nav {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .version-badge {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--accent-hover);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      cursor: pointer;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .language-picker select {
+      min-height: 44px;
+      padding: 0 8px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-main);
+      cursor: pointer;
+      appearance: none;
+      padding-right: 28px;
+      background-image: linear-gradient(45deg, transparent 50%, var(--text-sub) 50%), linear-gradient(135deg, var(--text-sub) 50%, transparent 50%);
+      background-position: calc(100% - 16px) 19px, calc(100% - 11px) 19px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .admin-status {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      background: var(--success-color);
+      color: #fff;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px 12px 4px 4px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+
+    .user-badge:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .user-badge-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--input-bg);
+    }
+
+    .user-badge-name {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-badge-login {
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+
+    .user-badge-login:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      position: relative;
+      min-height: 200px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--bg-color);
+      overflow: hidden;
+    }
+
+    .profile-header-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .profile-header-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      width: 100%;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      margin-bottom: 12px;
+      background: var(--input-bg);
+    }
+
+    .profile-display-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .profile-username {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .profile-bio {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      font-size: 0.9rem;
+      max-width: 100%;
+      word-wrap: break-word;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      font-size: 0.8rem;
+    }
+
+    .profile-stats span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .profile-edit-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .profile-edit-btn:hover {
+      background: rgba(99, 102, 241, 0.6);
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .auth-tab.active {
+      background: var(--accent-color);
+      color: #fff;
+    }
+
+    .auth-tab:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .auth-form .form-group {
+      margin-bottom: 12px;
+    }
+
+    .auth-error {
+      color: var(--danger-color);
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .auth-success {
+      color: var(--success-color);
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .user-profile-modal .modal-card {
+      max-width: 500px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #f8fafc, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--text-sub);
+      font-size: 0.95rem;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      margin: 24px 0 12px 4px;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    button, .nav-btn, .user-badge-login, .card, .close-btn, .submit-btn {
+      min-height: 44px;
+    }
+
+    body.page-ready .card {
+      animation: pageCardIn 0.42s both;
+    }
+
+    @keyframes pageCardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(99, 102, 241, 0.2);
+    }
+
+    .card.bug-card { border-color: rgba(239, 68, 68, 0.3); }
+    .card.bug-card:hover {
+      border-color: rgba(239, 68, 68, 0.6);
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(239, 68, 68, 0.3);
+    }
+    .card.bug-card .card-icon { background: rgba(239, 68, 68, 0.15); }
+    .card.bug-card .card-icon svg { stroke: #f87171; }
+
+    .card.suggestion-card { border-color: rgba(245, 158, 11, 0.3); }
+    .card.suggestion-card:hover {
+      border-color: rgba(245, 158, 11, 0.6);
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(245, 158, 11, 0.3);
+    }
+    .card.suggestion-card .card-icon { background: rgba(245, 158, 11, 0.15); }
+    .card.suggestion-card .card-icon svg { stroke: #fbbf24; }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.25s ease;
+      overflow: hidden;
+    }
+
+    .card-icon img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: var(--text-main);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .card:hover .card-icon { background: rgba(99, 102, 241, 0.2); }
+
+    .card-info { flex: 1; overflow: hidden; }
+    .card-title { font-weight: 600; font-size: 1rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-desc { font-size: 0.75rem; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .edit-card-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .arrow { color: var(--text-sub); opacity: 0; transform: translateX(-6px); transition: all 0.25s ease; font-size: 1.1rem; }
+    .card:hover .arrow { opacity: 1; transform: translateX(0); color: var(--accent-hover); }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+
+    .modal-card {
+      background: rgba(30, 41, 59, 0.95);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-card { transform: scale(1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+
+    .modal-header h2 { font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+
+    .close-btn {
+      background: transparent; border: none; color: var(--text-sub); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 4px; border-radius: 6px;
+    }
+    .close-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.1); }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.85rem; color: var(--text-sub); font-weight: 500; }
+    .form-control {
+      background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 14px; color: var(--text-main); font-size: 0.9rem; outline: none; color-scheme: dark;
+    }
+    .form-control:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+    textarea.form-control { resize: vertical; min-height: 90px; }
+
+    .submit-btn {
+      background: var(--accent-color); color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s;
+    }
+    .submit-btn:hover { background: var(--accent-hover); }
+
+    .submit-btn.suggestion-btn {
+      background: var(--suggestion-color);
+    }
+    .submit-btn.suggestion-btn:hover {
+      background: #d97706;
+    }
+
+    .submit-btn.danger-btn {
+      background: var(--danger-color);
+    }
+    .submit-btn.danger-btn:hover {
+      background: #dc2626;
+    }
+
+    .submit-btn.success-btn {
+      background: var(--success-color);
+    }
+    .submit-btn.success-btn:hover {
+      background: #059669;
+    }
+
+    .bug-item, .suggestion-item {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .bug-item-header, .suggestion-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .bug-status-tag, .suggestion-status-tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .status-unresolved { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .status-resolved { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .status-accepted { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .status-rejected { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .resolve-btn, .accept-btn {
+      background: var(--success-color);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 6px;
+      align-self: flex-end;
+    }
+    .resolve-btn:hover, .accept-btn:hover { opacity: 0.9; }
+
+    .reject-btn {
+      background: var(--danger-color);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 6px;
+      margin-right: 6px;
+      align-self: flex-end;
+    }
+    .reject-btn:hover { opacity: 0.9; }
+
+    .suggestion-actions {
+      display: flex;
+      gap: 6px;
+      align-self: flex-end;
+      margin-top: 6px;
+    }
+
+    .status-tag-suggestion { 
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .status-pending-tag { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .status-accepted-tag { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .status-rejected-tag { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    #otherSectionGroup { display: none; }
+    #suggestionOtherSectionGroup { display: none; }
+
+    .file-upload-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-upload-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      background: var(--input-bg);
+      border: 1px dashed var(--card-border);
+      border-radius: 8px;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .file-upload-label:hover {
+      border-color: var(--accent-color);
+      color: var(--text-main);
+    }
+
+    .file-upload-label .file-name {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .profile-actions .nav-btn {
+      font-size: 0.75rem;
+      padding: 4px 12px;
+    }
+
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+    .settings-item-info {
+      flex: 1;
+      padding-right: 16px;
+    }
+    .settings-item-title {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .settings-item-desc {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255,255,255,0.15);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider {
+      background-color: var(--accent-color);
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .settings-section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      margin-top: 20px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .settings-section-title:first-child {
+      margin-top: 0;
+    }
+
+    .settings-danger-btn {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .settings-danger-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    @media (max-width: 640px) {
+      .top-nav {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .nav-links {
+        width: 100%;
+        justify-content: flex-end;
+      }
+      .user-badge-name {
+        max-width: 60px;
+      }
+      .profile-stats {
+        gap: 15px;
+        font-size: 0.7rem;
+      }
+      .modal-card {
+        padding: 16px;
+        max-height: 90vh;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand-logo">
+      <span>服务器导航</span>
+      <span class="version-badge" id="currentVerBadge" onclick="openChangelogModal()" title="查看更新日志">v1.2</span>
+    </div>
+    <div class="nav-links">
+      <span id="adminBadge" class="admin-status">已登录管理员</span>
+      <div id="userArea">
+        <span class="user-badge-login" onclick="openAuthModal()">登录 / 注册</span>
+      </div>
+      <button class="nav-btn" onclick="showServerWelcome()">加入服务器</button>
+      <button class="nav-btn" onclick="openChangelogModal()">更新日志</button>
+      <button class="nav-btn" onclick="openSettingsModal()">设置</button>
+      <button class="nav-btn" onclick="openAboutModal()">关于</button>
+      <label class="language-picker" title="Language">
+        <span class="sr-only">Language</span>
+        <select id="languageSelect" aria-label="Language">
+          <option value="zh-CN">简体中文</option>
+          <option value="en">English</option>
+          <option value="zh-TW">繁體中文</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <div class="container">
+    <header class="header">
+      <h1>服务器导航入口</h1>
+      <p>点击下方卡片即可快速跳转至对应服务站点</p>
+    </header>
+
+    <main>
+      <div class="section-title">世界地图导航</div>
+      <div class="grid" id="gridWorld">
+        <a href="" class="card" data-id="overworld" data-port="8080" data-path="/?world=minecraft_overworld&zoom=4&x=0&z=0">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'overworld')">编辑</button>
+          <div class="card-icon"><img src="resource/grassblock.webp" alt="主世界"></div>
+          <div class="card-info"><div class="card-title">主世界地图</div><div class="card-desc">Overworld Map</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+
+        <a href="" class="card" data-id="nether" data-port="8080" data-path="/?world=minecraft_the_nether&zoom=4&x=0&z=0">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'nether')">编辑</button>
+          <div class="card-icon"><img src="resource/netherrack.webp" alt="下界"></div>
+          <div class="card-info"><div class="card-title">下界地图</div><div class="card-desc">Nether Map</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+
+        <a href="" class="card" data-id="end" data-port="8080" data-path="/?world=minecraft_the_end&zoom=4&x=0&z=0">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'end')">编辑</button>
+          <div class="card-icon"><img src="resource/BlockSprite_end-stone.webp" alt="末地"></div>
+          <div class="card-info"><div class="card-title">末地地图</div><div class="card-desc">End Map</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+
+        <a href="" class="card" data-id="transit" data-port="8888" data-path="/">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'transit')">编辑</button>
+          <div class="card-icon"><img src="resource/logo_5.png" alt="交通线路图"></div>
+          <div class="card-info"><div class="card-title">交通线路图</div><div class="card-desc">Transit Network Map</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+
+      <div class="modal-overlay" id="joinServerModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>加入服务器</h2>
+            <button class="close-btn" onclick="closeModal('joinServerModal')">&times;</button>
+          </div>
+          <div class="form-group">
+            <label for="joinServerTextInput">服务器说明</label>
+            <textarea id="joinServerTextInput" class="form-control" rows="4" readonly></textarea>
+          </div>
+          <button id="saveJoinServerTextBtn" class="submit-btn" style="display:none; margin-top:12px;">保存说明</button>
+        </div>
+      </div>
+
+      <div class="section-title">工具与资源</div>
+      <div class="grid" id="gridTools">
+        <a href="" class="card" data-id="notice" data-port="6778" data-path="/">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'notice')">编辑</button>
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
+          <div class="card-info"><div class="card-title">服务器公告</div><div class="card-desc">最新动态与维护通知</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+
+        <a href="" class="card" data-id="download" data-port="25008" data-path="/">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'download')">编辑</button>
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
+          <div class="card-info"><div class="card-title">资源下载</div><div class="card-desc">整合包 / 客户端下载</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+
+        <a href="" class="card" data-id="chat" data-port="7891" data-path="/">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'chat')">编辑</button>
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+          <div class="card-info"><div class="card-title">在线聊天室</div><div class="card-desc">玩家实时沟通交流</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+
+        <a href="" class="card" data-id="opanel">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'opanel')">编辑</button>
+          <div class="card-icon"><img src="resource/opanel.png" alt="Opanel"></div>
+          <div class="card-info"><div class="card-title">Opanel</div><div class="card-desc">待填写描述</div></div>
+          <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+
+      <div class="section-title">反馈与支持</div>
+      <div class="grid">
+        <div class="card bug-card" onclick="openBugModal()">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg></div>
+          <div class="card-info">
+            <div class="card-title">Bug 汇报与记录</div>
+            <div class="card-desc">提交问题或查看解决进度</div>
+          </div>
+          <span class="arrow">&rarr;</span>
+        </div>
+
+        <div class="card suggestion-card" onclick="openSuggestionModal()">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg></div>
+          <div class="card-info">
+            <div class="card-title">建议与优化</div>
+            <div class="card-desc">提交建议或查看采纳状态</div>
+          </div>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="aboutModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>关于服务器</h2>
+        <button class="close-btn" onclick="closeModal('aboutModal')">&times;</button>
+      </div>
+      <p style="color: var(--text-sub); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">
+        欢迎使用服务器导航面板！本面板旨在为所有玩家提供极速、便捷的服务跳转，包含实时地图、整合包下载以及官方聊天室等通道。
+      </p>
+      
+      <div style="border-top: 1px dashed var(--card-border); padding-top: 16px;">
+        <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-main);">管理员权限控制</h3>
+        <div id="loginArea">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <input type="password" id="adminPassword" class="form-control" placeholder="请输入管理员密码">
+          </div>
+          <button class="submit-btn" onclick="handleAdminLogin()">登录管理员系统</button>
+        </div>
+        <div id="loggedArea" style="display: none;">
+          <p style="color: var(--success-color); font-size: 0.85rem; margin-bottom: 12px;">已解锁管理员权限！您现在可以直接编辑卡片或新增版本日志。</p>
+          <button class="submit-btn" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);" onclick="handleAdminLogout()">退出管理员账户</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>设置</h2>
+        <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+      </div>
+
+      <div class="settings-section-title">浏览行为</div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <div class="settings-item-title">在新标签页打开卡片</div>
+          <div class="settings-item-desc">关闭时，点击卡片会在当前页面直接跳转；开启时，会打开新的标签页。</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingOpenInNewTab" onchange="handleSettingChange('openInNewTab', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <div class="settings-item-title">显示卡片编辑按钮</div>
+          <div class="settings-item-desc">即使未登录管理员，也显示编辑按钮（编辑仍需要管理员密码）。</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingShowEditButtons" onchange="handleSettingChange('showEditButtons', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-section-title">数据</div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <div class="settings-item-title">清除本地缓存</div>
+          <div class="settings-item-desc">清除语言、设置、管理员登录态等本地存储。不影响服务器上的数据。</div>
+        </div>
+        <button class="settings-danger-btn" onclick="handleClearLocalStorage()">清除</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="changelogModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>版本更新记录</h2>
+        <button class="close-btn" onclick="closeModal('changelogModal')">&times;</button>
+      </div>
+      
+      <div id="adminChangelogAddForm" style="display: none; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border); margin-bottom: 16px;">
+        <h3 style="font-size: 0.9rem; color: var(--accent-hover); margin-bottom: 10px;">添加新版本更新说明</h3>
+        <form onsubmit="handleChangelogSubmit(event)">
+          <div class="form-group" style="margin-bottom: 8px;">
+            <input type="text" id="newVerTitle" class="form-control" placeholder="版本号（如 v1.0-Beta 6）" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 8px;">
+            <textarea id="newVerContent" class="form-control" style="min-height: 60px;" placeholder="具体日志（多条日志换行填写）" required></textarea>
+          </div>
+          <button type="submit" class="submit-btn" style="padding: 6px 12px; font-size: 0.85rem;">发布新版本更新</button>
+        </form>
+      </div>
+
+      <div id="changelogListContainer" style="display: flex; flex-direction: column; gap: 16px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="bugModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>[Bug] 汇报与解决跟踪</h2>
+        <button class="close-btn" onclick="closeModal('bugModal')">&times;</button>
+      </div>
+
+      <form id="bugReportForm" onsubmit="handleBugSubmit(event)" style="margin-bottom: 24px;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="reporterName">玩家名称 / ID</label>
+            <input type="text" id="reporterName" class="form-control" placeholder="请输入您的游戏ID" required>
+          </div>
+          <div class="form-group">
+            <label for="reportDateTime">发生 / 汇报时间</label>
+            <input type="datetime-local" id="reportDateTime" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="bugSection">涉及板块</label>
+            <select id="bugSection" class="form-control" onchange="toggleOtherSectionInput(this.value)" required>
+              <option value="" disabled selected>选择对应板块...</option>
+              <option value="主世界地图">主世界地图</option>
+              <option value="下界地图">下界地图</option>
+              <option value="末地地图">末地地图</option>
+              <option value="交通线路图">交通线路图</option>
+              <option value="服务器公告">服务器公告</option>
+              <option value="资源下载">资源下载</option>
+              <option value="在线聊天室">在线聊天室</option>
+              <option value="Opanel">Opanel</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="bugType">Bug 类型</label>
+            <select id="bugType" class="form-control" required>
+              <option value="" disabled selected>选择类型...</option>
+              <option value="功能异常">功能异常 / 故障</option>
+              <option value="界面错乱">界面显示错乱</option>
+              <option value="地图/数据错误">地图 / 数据错误</option>
+              <option value="性能卡顿/崩溃">性能卡顿 / 崩溃</option>
+              <option value="其他">其他类型</option>
+            </select>
+          </div>
+          <div class="form-group full-width" id="otherSectionGroup">
+            <label for="otherSectionInput">具体涉及板块名称</label>
+            <input type="text" id="otherSectionInput" class="form-control" placeholder="请输入具体的板块或位置">
+          </div>
+        </div>
+        <div class="form-group full-width" style="margin-bottom: 12px;">
+          <label for="bugDetail">详细过程 / 复现步骤</label>
+          <textarea id="bugDetail" class="form-control" placeholder="请详细描述问题触发过程..." required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">提交 Bug 汇报</button>
+      </form>
+
+      <div style="border-top: 1px solid var(--card-border); padding-top: 16px;">
+        <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-main); display:flex; align-items:center; justify-content:space-between;">
+          <span>Bug 历史汇报记录</span>
+          <button id="copySelectedBugsBtn" class="admin-copy-btn" type="button" style="display:none;">复制选中内容</button>
+        </h3>
+        <div id="bugListContainer">
+          <p style="color: var(--text-sub); font-size: 0.85rem; text-align: center;">加载中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="suggestionModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>[建议] 与优化反馈</h2>
+        <button class="close-btn" onclick="closeModal('suggestionModal')">&times;</button>
+      </div>
+
+      <form id="suggestionReportForm" onsubmit="handleSuggestionSubmit(event)" style="margin-bottom: 24px;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="suggestionReporterName">玩家名称 / ID</label>
+            <input type="text" id="suggestionReporterName" class="form-control" placeholder="请输入您的游戏ID" required>
+          </div>
+          <div class="form-group">
+            <label for="suggestionDateTime">提交时间</label>
+            <input type="datetime-local" id="suggestionDateTime" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="suggestionSection">涉及板块</label>
+            <select id="suggestionSection" class="form-control" onchange="toggleSuggestionOtherSectionInput(this.value)" required>
+              <option value="" disabled selected>选择对应板块...</option>
+              <option value="主世界地图">主世界地图</option>
+              <option value="下界地图">下界地图</option>
+              <option value="末地地图">末地地图</option>
+              <option value="交通线路图">交通线路图</option>
+              <option value="服务器公告">服务器公告</option>
+              <option value="资源下载">资源下载</option>
+              <option value="在线聊天室">在线聊天室</option>
+              <option value="Opanel">Opanel</option>
+              <option value="整体体验">整体服务器体验</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="suggestionPriority">建议优先级</label>
+            <select id="suggestionPriority" class="form-control" required>
+              <option value="" disabled selected>选择优先级...</option>
+              <option value="低">低 - 锦上添花</option>
+              <option value="中">中 - 值得考虑</option>
+              <option value="高">高 - 体验优化重要</option>
+              <option value="紧急">紧急 - 急需改进</option>
+            </select>
+          </div>
+          <div class="form-group full-width" id="suggestionOtherSectionGroup">
+            <label for="suggestionOtherSectionInput">具体涉及板块名称</label>
+            <input type="text" id="suggestionOtherSectionInput" class="form-control" placeholder="请输入具体的板块或位置">
+          </div>
+        </div>
+        <div class="form-group full-width" style="margin-bottom: 12px;">
+          <label for="suggestionDetail">详细建议内容</label>
+          <textarea id="suggestionDetail" class="form-control" placeholder="请详细描述您的优化建议或新功能想法..." required></textarea>
+        </div>
+        <button type="submit" class="submit-btn suggestion-btn">提交建议反馈</button>
+      </form>
+
+      <div style="border-top: 1px solid var(--card-border); padding-top: 16px;">
+        <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-main); display:flex; align-items:center; justify-content:space-between;">
+          <span>建议历史记录</span>
+          <button id="copySelectedSuggestionsBtn" class="admin-copy-btn" type="button" style="display:none;">复制选中内容</button>
+        </h3>
+        <div id="suggestionListContainer">
+          <p style="color: var(--text-sub); font-size: 0.85rem; text-align: center;">加载中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editCardModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>编辑板块内容</h2>
+        <button class="close-btn" onclick="closeModal('editCardModal')">&times;</button>
+      </div>
+      <form onsubmit="handleSaveCardEdit(event)">
+        <input type="hidden" id="editCardId">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label>板块名称 (标题)</label>
+          <input type="text" id="editCardTitle" class="form-control" required>
+          <input type="text" id="editCardTitleEn" class="form-control" placeholder="English title">
+          <input type="text" id="editCardTitleTw" class="form-control" placeholder="繁體中文標題">
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label>描述信息</label>
+          <input type="text" id="editCardDesc" class="form-control" required>
+          <input type="text" id="editCardDescEn" class="form-control" placeholder="English description">
+          <input type="text" id="editCardDescTw" class="form-control" placeholder="繁體中文描述">
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label>跳转链接 URL</label>
+          <input type="text" id="editCardUrl" class="form-control" placeholder="例: /board 或 https://example.com" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>图标图片路径 (资源相对路径或图片 URL)</label>
+          <input type="text" id="editCardIcon" class="form-control" placeholder="例: resource/grassblock.webp">
+        </div>
+        <button type="submit" class="submit-btn">保存修改</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>用户中心</h2>
+        <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
+      </div>
+
+      <div id="authError" class="auth-error"></div>
+      <div id="authSuccess" class="auth-success"></div>
+
+      <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>用户名</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="请输入用户名" required>
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="submit-btn">登录</button>
+      </form>
+
+      <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>用户名 (至少3个字符)</label>
+          <input type="text" id="registerUsername" class="form-control" placeholder="请设置用户名" required minlength="3">
+        </div>
+        <div class="form-group">
+          <label>显示名称</label>
+          <input type="text" id="registerDisplayName" class="form-control" placeholder="请输入显示名称（可选）">
+        </div>
+        <div class="form-group">
+          <label>密码 (至少6个字符)</label>
+          <input type="password" id="registerPassword" class="form-control" placeholder="请设置密码" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label>确认密码</label>
+          <input type="password" id="registerConfirmPassword" class="form-control" placeholder="请再次输入密码" required>
+        </div>
+        <button type="submit" class="submit-btn success-btn">注册</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay user-profile-modal" id="userProfileModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>用户主页</h2>
+        <button class="close-btn" onclick="closeModal('userProfileModal')">&times;</button>
+      </div>
+      <div id="userProfileContent">
+        <div class="profile-header" id="profileHeader">
+          <img id="profileBgImg" class="profile-header-bg" src="" alt="背景">
+          <div class="profile-header-content">
+            <img id="profileAvatar" class="profile-avatar" src="" alt="头像">
+            <div class="profile-display-name" id="profileDisplayName">加载中...</div>
+            <div class="profile-username" id="profileUsername">@username</div>
+            <div class="profile-bio" id="profileBio">这个人很懒，什么都没有写~</div>
+            <div class="profile-stats">
+              <span>&#128197; 加入: <span id="profileJoined">--</span></span>
+              <span>&#128338; 最后活跃: <span id="profileLastActive">--</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="profileEditArea" style="display: none; border-top: 1px solid var(--card-border); padding-top: 16px; margin-top: 4px;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-main);">编辑个人资料</h3>
+          
+          <form id="profileEditForm" onsubmit="handleProfileUpdate(event)">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label>显示名称</label>
+              <input type="text" id="editDisplayName" class="form-control" placeholder="显示名称">
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label>个人简介</label>
+              <textarea id="editBio" class="form-control" placeholder="介绍一下自己吧~" rows="2"></textarea>
+            </div>
+            <button type="submit" class="submit-btn" style="margin-bottom: 12px;">保存资料</button>
+          </form>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-sub);">更换头像</label>
+              <div class="file-upload-wrapper">
+                <div class="file-upload-label">
+                  <span>&#128444;&#65039; 选择图片</span>
+                  <span class="file-name" id="avatarFileName">未选择</span>
+                </div>
+                <input type="file" id="avatarFileInput" accept="image/*" onchange="uploadAvatar(this)">
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-sub);">更换背景</label>
+              <div class="file-upload-wrapper">
+                <div class="file-upload-label">
+                  <span>&#128193; 选择文件</span>
+                  <span class="file-name" id="bgFileName">未选择</span>
+                </div>
+                <input type="file" id="bgFileInput" accept="image/*,video/*" onchange="uploadBackground(this)">
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 12px;">
+            <button class="submit-btn danger-btn" onclick="handleLogout()" style="font-size: 0.85rem; padding: 8px;">退出登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const currentHost = window.location.hostname || 'localhost';
+    const API_BASE = `${window.location.origin}/api`;
+    let currentUserId = null;
+    let currentUser = null;
+    const userProfileChannel = 'BroadcastChannel' in window
+      ? new BroadcastChannel('user_profile_sync')
+      : null;
+
+    let isAdmin = false;
+    let adminToken = sessionStorage.getItem('admin_token') || null;
+    let bugData = [];
+    let suggestionData = [];
+    const selectedBugIds = new Set();
+    const selectedSuggestionIds = new Set();
+    let changelogData = [];
+    let cardCustoms = {};
+
+    const SETTINGS_KEY = 'webserve-settings';
+    const defaultSettings = {
+      openInNewTab: false,
+      showEditButtons: false
+    };
+    let userSettings = loadSettings();
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return { ...defaultSettings };
+        return { ...defaultSettings, ...JSON.parse(raw) };
+      } catch (e) {
+        return { ...defaultSettings };
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+    }
+
+    function handleSettingChange(key, value) {
+      userSettings[key] = value;
+      saveSettings();
+      applySettings();
+    }
+
+    function applySettings() {
+      document.querySelectorAll('.card[data-id]').forEach(card => {
+        if (userSettings.openInNewTab) {
+          card.setAttribute('target', '_blank');
+          card.setAttribute('rel', 'noopener noreferrer');
+        } else {
+          card.removeAttribute('target');
+          card.removeAttribute('rel');
         }
+      });
+
+      if (!isAdmin && userSettings.showEditButtons) {
+        document.querySelectorAll('.edit-card-btn').forEach(btn => btn.style.display = 'block');
+      }
     }
-}
 
-if ($toRemove.Count -gt 0) {
-    Write-Host "  检测到 $($toRemove.Count) 个文件已被追踪，从 Git 索引移除..." -ForegroundColor Yellow
-    foreach ($f in $toRemove) {
-        git rm --cached --quiet $f 2>$null
+    function openSettingsModal() {
+      document.getElementById('settingOpenInNewTab').checked = !!userSettings.openInNewTab;
+      document.getElementById('settingShowEditButtons').checked = !!userSettings.showEditButtons;
+      openModal('settingsModal');
     }
-    Write-Host "  已移除，本地文件仍保留" -ForegroundColor DarkGray
-}
 
-Write-Host ""
+    function handleClearLocalStorage() {
+      if (!confirm('确定清除本地缓存吗？\n\n会清除：语言、设置、管理员登录态。\n不会影响：服务器上的数据、已保存的 Bug、公告、用户账号。')) return;
+      localStorage.removeItem('webserve-language');
+      localStorage.removeItem(SETTINGS_KEY);
+      sessionStorage.removeItem('admin_token');
+      alert('已清除，页面即将刷新。');
+      location.reload();
+    }
 
-# ========== 检测改动 ==========
-$status = git status --porcelain
-$changes = ($status | Measure-Object).Count
+    const cardDefaults = {
+      overworld: { title: '主世界地图', desc: 'Overworld Map', titleEn: 'Overworld Map', descEn: 'Overworld Map', titleTw: '主世界地圖', descTw: '主世界地圖' },
+      nether: { title: '下界地图', desc: 'Nether Map', titleEn: 'Nether Map', descEn: 'Nether Map', titleTw: '下界地圖', descTw: '下界地圖' },
+      end: { title: '末地地图', desc: 'End Map', titleEn: 'End Map', descEn: 'End Map', titleTw: '末地地圖', descTw: '末地地圖' },
+      transit: { title: '交通线路图', desc: 'Transit Network Map', titleEn: 'Transit Network Map', descEn: 'Transit Network Map', titleTw: '交通路線圖', descTw: '交通路線圖' },
+      notice: { title: '服务器公告', desc: '最新动态与更新通知', titleEn: 'Server Notices', descEn: 'Latest updates and announcements', titleTw: '伺服器公告', descTw: '最新動態與更新通知' },
+      download: { title: '资源下载', desc: '整合包 / 客户端下载', titleEn: 'Resource Downloads', descEn: 'Modpacks and client downloads', titleTw: '資源下載', descTw: '整合包 / 用戶端下載' },
+      chat: { title: '在线聊天室', desc: '玩家实时沟通交流', titleEn: 'Online Chat', descEn: 'Real-time player communication', titleTw: '線上聊天室', descTw: '玩家即時溝通交流' },
+      opanel: { title: 'Opanel', desc: '待填写描述', titleEn: 'Opanel', descEn: 'Opanel Panel', titleTw: 'Opanel', descTw: '待填寫描述' }
+    };
 
-if ($changes -eq 0) {
-    Write-Host "[信息] 没有检测到任何文件改动。" -ForegroundColor Green
-    Write-Host ""
-    $pushNow = Read-Host "是否仍要推送到远程？(Y/N)"
-    if ($pushNow -match '^[Yy]') {
-        Write-Host "[执行] git push"
-        git push
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "[警告] 推送失败。" -ForegroundColor Red
-            Read-Host "按回车退出"
-            exit 1
+    document.addEventListener('DOMContentLoaded', () => {
+      initCardLinks();
+      applySettings();
+      fetchCards();
+      fetchBugs();
+      fetchSuggestions();
+      fetchChangelogs();
+      fetchSiteConfig();
+      initRealtimeStream();
+      checkUserSession();
+      
+      if (adminToken) {
+        setAdminState(true);
+      }
+    });
+
+    if (userProfileChannel) {
+      userProfileChannel.onmessage = (event) => {
+        if (!event.data || event.data.type !== 'USER_UPDATED') return;
+        checkUserSession();
+      };
+    }
+
+    function notifyUserUpdated(user) {
+      if (userProfileChannel) {
+        userProfileChannel.postMessage({ type: 'USER_UPDATED', user: user || { id: null } });
+      }
+    }
+
+    setInterval(() => {
+      if (document.visibilityState !== 'hidden') checkUserSession();
+    }, 10000);
+
+    function showServerWelcome() {
+      const input = document.getElementById('joinServerTextInput');
+      input.value = siteConfig.joinServerText || '';
+      input.readOnly = !isAdmin;
+      document.getElementById('saveJoinServerTextBtn').style.display = isAdmin ? 'block' : 'none';
+      openModal('joinServerModal');
+    }
+
+    let siteConfig = { joinServerText: '' };
+    async function fetchSiteConfig() {
+      try {
+        const res = await fetch(`${API_BASE}/site-config`);
+        if (res.ok) siteConfig = await res.json();
+      } catch (err) {
+        console.error('获取服务器说明失败:', err);
+      }
+    }
+    document.getElementById('saveJoinServerTextBtn').addEventListener('click', async () => {
+      if (!isAdmin) return;
+      const joinServerText = document.getElementById('joinServerTextInput').value.trim();
+      if (!joinServerText) return alert('服务器说明不能为空');
+      const res = await fetch(`${API_BASE}/site-config`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ joinServerText })
+      });
+      if (!res.ok) return alert('保存失败，请检查管理员权限');
+      siteConfig = await res.json().then(data => data.config);
+      alert('保存成功');
+    });
+
+    async function checkUserSession() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          credentials: 'include'
+        });
+        if (res.ok) {
+          const user = await res.json();
+          currentUser = user;
+          currentUserId = user.id;
+          renderUserBadge(user);
+          return user;
         }
-        Write-Host "[完成] 已推送到远程。" -ForegroundColor Green
-        Open-Cloudflare
-    } else {
-        Write-Host "[跳过] 已取消。"
+      } catch (err) {
+        console.log('未登录');
+      }
+      currentUser = null;
+      renderUserBadge(null);
+      return null;
     }
-    Read-Host "按回车退出"
-    exit 0
-}
 
-Write-Host "[检测] 共发现 $changes 处改动：" -ForegroundColor Yellow
-Write-Host ""
-git status --short
-Write-Host ""
-
-$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$commitMsg = Read-Host "请输入提交信息（直接回车使用默认）"
-if ([string]::IsNullOrWhiteSpace($commitMsg)) {
-    $commitMsg = "auto update $timestamp"
-}
-
-Write-Host ""
-Write-Host "[执行] git add ."
-git add .
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[错误] git add 失败。" -ForegroundColor Red
-    Read-Host "按回车退出"
-    exit 1
-}
-
-Write-Host "[执行] git commit"
-git commit -m $commitMsg
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[错误] git commit 失败。" -ForegroundColor Red
-    Read-Host "按回车退出"
-    exit 1
-}
-
-Write-Host ""
-Write-Host "[执行] git push"
-git push
-if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "[警告] 推送失败。可能原因：" -ForegroundColor Red
-    Write-Host "  - 首次推送需要完成 GitHub 登录验证"
-    Write-Host "  - 远程仓库有新的提交，需要先 git pull"
-    Write-Host "  - 未设置远程仓库（用 git remote -v 检查）"
-    Read-Host "按回车退出"
-    exit 1
-}
-
-Write-Host ""
-Write-Host "========================================" -ForegroundColor Green
-Write-Host "   [成功] 已提交并推送到远程" -ForegroundColor Green
-Write-Host "========================================" -ForegroundColor Green
-Write-Host ""
-
-Open-Cloudflare
-
-Read-Host "按回车退出"
-
-
-function Open-Cloudflare {
-    if ([string]::IsNullOrWhiteSpace($CF_URL)) { return }
-    if ($AUTO_OPEN -eq 1) {
-        Write-Host "[打开] Cloudflare 控制台..." -ForegroundColor Cyan
-        Start-Process $CF_URL
-        return
+    function renderUserBadge(user) {
+      const area = document.getElementById('userArea');
+      if (user) {
+        area.innerHTML = `
+          <div class="user-badge" onclick="openUserProfile('${user.id}')">
+            <img class="user-badge-avatar" src="${user.avatar || '/api/uploads/default_avatar.png'}" alt="头像" 
+                 onerror="this.src='/api/uploads/default_avatar.png'">
+            <span class="user-badge-name">${escapeHtml(user.displayName || user.username)}</span>
+          </div>
+        `;
+      } else {
+        area.innerHTML = `
+          <span class="user-badge-login" onclick="openAuthModal()">登录 / 注册</span>
+        `;
+      }
     }
-    $openNow = Read-Host "是否打开 Cloudflare 控制台？(Y/N)"
-    if ($openNow -match '^[Yy]') {
-        Write-Host "[打开] $CF_URL" -ForegroundColor Cyan
-        Start-Process $CF_URL
+
+    function openAuthModal() {
+      document.getElementById('authError').style.display = 'none';
+      document.getElementById('authSuccess').style.display = 'none';
+      document.getElementById('loginForm').reset();
+      document.getElementById('registerForm').reset();
+      switchAuthTab('login');
+      openModal('authModal');
     }
-}
+
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      if (tab === 'login') {
+        document.querySelector('.auth-tab:first-child').classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+      } else {
+        document.querySelector('.auth-tab:last-child').classList.add('active');
+        document.getElementById('registerForm').classList.add('active');
+      }
+      document.getElementById('authError').style.display = 'none';
+      document.getElementById('authSuccess').style.display = 'none';
+    }
+
+    function showAuthError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('authSuccess').style.display = 'none';
+    }
+
+    function showAuthSuccess(msg) {
+      const el = document.getElementById('authSuccess');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('authError').style.display = 'none';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAuthSuccess('登录成功！');
+          setTimeout(() => {
+            closeModal('authModal');
+            renderUserBadge(data.user);
+            currentUser = data.user;
+            currentUserId = data.user.id;
+            notifyUserUpdated(data.user);
+            location.reload();
+          }, 500);
+        } else {
+          showAuthError(data.error || '登录失败');
+        }
+      } catch (err) {
+        showAuthError('网络错误，请重试');
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('registerUsername').value.trim();
+      const displayName = document.getElementById('registerDisplayName').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const confirm = document.getElementById('registerConfirmPassword').value;
+
+      if (password !== confirm) {
+        showAuthError('两次密码输入不一致');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password, displayName: displayName || username })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAuthSuccess('注册成功！正在跳转...');
+          setTimeout(() => {
+            closeModal('authModal');
+            renderUserBadge(data.user);
+            currentUser = data.user;
+            currentUserId = data.user.id;
+            notifyUserUpdated(data.user);
+            location.reload();
+          }, 500);
+        } else {
+          showAuthError(data.error || '注册失败');
+        }
+      } catch (err) {
+        showAuthError('网络错误，请重试');
+      }
+    }
+
+    async function handleLogout() {
+      if (!confirm('确定要退出登录吗？')) return;
+      try {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        currentUserId = null;
+        currentUser = null;
+        closeModal('userProfileModal');
+        renderUserBadge(null);
+        notifyUserUpdated(null);
+        location.reload();
+      } catch (err) {
+        alert('退出失败，请重试');
+      }
+    }
+
+    async function openUserProfile(userId) {
+      try {
+        const res = await fetch(`${API_BASE}/users/${userId}`, {
+          credentials: 'include'
+        });
+        if (!res.ok) throw new Error('用户不存在');
+        const user = await res.json();
+        renderUserProfile(user);
+        openModal('userProfileModal');
+      } catch (err) {
+        alert('加载用户信息失败: ' + err.message);
+      }
+    }
+
+    function renderUserProfile(user) {
+      const isOwn = currentUserId === user.id;
+      
+      document.getElementById('profileAvatar').src = user.avatar || '/api/uploads/default_avatar.png';
+      document.getElementById('profileAvatar').onerror = function() { this.src = '/api/uploads/default_avatar.png'; };
+      
+      const bgImg = document.getElementById('profileBgImg');
+      if (user.background && user.background !== '/api/uploads/default_bg.png') {
+        bgImg.src = user.background;
+        bgImg.style.display = 'block';
+        bgImg.onerror = function() { this.style.display = 'none'; };
+        if (user.background.match(/\.(mp4|webm|ogg|mov|avi)$/i)) {
+          bgImg.style.display = 'none';
+          const header = document.getElementById('profileHeader');
+          const oldVideo = header.querySelector('.profile-bg-video');
+          if (oldVideo) oldVideo.remove();
+          const video = document.createElement('video');
+          video.className = 'profile-header-bg profile-bg-video';
+          video.src = user.background;
+          video.autoplay = true;
+          video.loop = true;
+          video.muted = true;
+          video.playsinline = true;
+          video.style.objectFit = 'cover';
+          header.insertBefore(video, header.firstChild);
+        }
+      } else {
+        bgImg.style.display = 'none';
+        const header = document.getElementById('profileHeader');
+        const oldVideo = header.querySelector('.profile-bg-video');
+        if (oldVideo) oldVideo.remove();
+      }
+      
+      document.getElementById('profileDisplayName').textContent = user.displayName || user.username;
+      document.getElementById('profileUsername').textContent = '@' + user.username;
+      document.getElementById('profileBio').textContent = user.bio || '这个人很懒，什么都没有写~';
+      
+      const joined = user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-CN') : '--';
+      document.getElementById('profileJoined').textContent = joined;
+      
+      const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString('zh-CN') : '--';
+      document.getElementById('profileLastActive').textContent = lastActive;
+
+      const editArea = document.getElementById('profileEditArea');
+      if (isOwn) {
+        editArea.style.display = 'block';
+        document.getElementById('editDisplayName').value = user.displayName || '';
+        document.getElementById('editBio').value = user.bio || '';
+      } else {
+        editArea.style.display = 'none';
+      }
+    }
+
+    async function handleProfileUpdate(e) {
+      e.preventDefault();
+      const displayName = document.getElementById('editDisplayName').value.trim();
+      const bio = document.getElementById('editBio').value.trim();
+
+      try {
+        const res = await fetch(`${API_BASE}/users/profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ displayName, bio })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('资料已更新！');
+          currentUser = data.user;
+          currentUserId = data.user.id;
+          renderUserProfile(data.user);
+          renderUserBadge(data.user);
+          notifyUserUpdated(data.user);
+        } else {
+          alert(data.error || '更新失败');
+        }
+      } catch (err) {
+        alert('网络错误，请重试');
+      }
+    }
+
+    async function uploadAvatar(input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      const label = document.getElementById('avatarFileName');
+      label.textContent = file.name;
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const res = await fetch(`${API_BASE}/users/avatar`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('头像已更新！');
+          const userRes = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+          if (userRes.ok) {
+            const user = await userRes.json();
+            currentUser = user;
+            currentUserId = user.id;
+            renderUserProfile(user);
+            renderUserBadge(user);
+            notifyUserUpdated(user);
+          }
+        } else {
+          alert(data.error || '上传失败');
+        }
+      } catch (err) {
+        alert('网络错误，请重试');
+      }
+      input.value = '';
+    }
+
+    async function uploadBackground(input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      const label = document.getElementById('bgFileName');
+      label.textContent = file.name;
+
+      const formData = new FormData();
+      formData.append('background', file);
+
+      try {
+        const res = await fetch(`${API_BASE}/users/background`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('背景已更新！');
+          const userRes = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+          if (userRes.ok) {
+            const user = await userRes.json();
+            currentUser = user;
+            currentUserId = user.id;
+            renderUserProfile(user);
+            renderUserBadge(user);
+            notifyUserUpdated(user);
+          }
+        } else {
+          alert(data.error || '上传失败');
+        }
+      } catch (err) {
+        alert('网络错误，请重试');
+      }
+      input.value = '';
+    }
+
+    function initCardLinks() {
+      document.querySelectorAll('.card[data-port]').forEach(card => {
+        const port = card.getAttribute('data-port');
+        const path = card.getAttribute('data-path') || '/';
+        const internalRoutes = { '6778': '/board', '25008': '/download', '7891': '/chat' };
+        const defaultUrl = internalRoutes[port]
+          ? `${window.location.origin}${internalRoutes[port]}${path === '/' ? '' : path}`
+          : `http://${currentHost}:${port}${path}`;
+        card.setAttribute('href', defaultUrl);
+      });
+    }
+
+    function setAdminState(active) {
+      isAdmin = active;
+      document.getElementById('loginArea').style.display = active ? 'none' : 'block';
+      document.getElementById('loggedArea').style.display = active ? 'block' : 'none';
+      document.getElementById('adminBadge').style.display = active ? 'inline-block' : 'none';
+      document.querySelectorAll('.edit-card-btn').forEach(btn => {
+        btn.style.display = active || userSettings.showEditButtons ? 'block' : 'none';
+      });
+      document.getElementById('adminChangelogAddForm').style.display = active ? 'block' : 'none';
+      document.getElementById('copySelectedBugsBtn').style.display = active ? 'inline-block' : 'none';
+      document.getElementById('copySelectedSuggestionsBtn').style.display = active ? 'inline-block' : 'none';
+      if (!active) {
+        selectedBugIds.clear();
+        selectedSuggestionIds.clear();
+      }
+      renderBugList();
+      renderSuggestionList();
+      renderChangelogs();
+    }
+
+    function initRealtimeStream() {
+      try {
+        const evtSource = new EventSource(`${API_BASE}/stream`);
+        evtSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.type === 'bugs_updated') {
+              fetchBugs();
+            } else if (data.type === 'suggestions_updated') {
+              fetchSuggestions();
+            } else if (data.type === 'changelogs_updated') {
+              fetchChangelogs();
+            } else if (data.type === 'cards_updated') {
+              fetchCards();
+            } else if (data.type === 'user_updated') {
+              checkUserSession();
+            }
+          } catch (err) {
+            console.log('解析SSE数据失败');
+          }
+        };
+      } catch (err) {
+        console.log('SSE连接失败');
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function openAboutModal() { openModal('aboutModal'); }
+    function openChangelogModal() { openModal('changelogModal'); }
+
+    function openBugModal() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('reportDateTime').value = now.toISOString().slice(0, 16);
+      document.getElementById('reporterName').value = currentUser ? currentUser.username : '';
+      openModal('bugModal');
+    }
+
+    function openSuggestionModal() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('suggestionDateTime').value = now.toISOString().slice(0, 16);
+      document.getElementById('suggestionReporterName').value = currentUser ? currentUser.username : '';
+      openModal('suggestionModal');
+    }
+
+    async function handleAdminLogin() {
+      const pwdInput = document.getElementById('adminPassword').value.trim();
+      
+      if (!pwdInput) {
+        alert('请输入密码！');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwdInput })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          adminToken = data.token;
+          sessionStorage.setItem('admin_token', adminToken);
+          setAdminState(true);
+          document.getElementById('adminPassword').value = '';
+          alert('登录成功！管理员功能已开启。');
+        } else {
+          alert(data.error || '密码错误！');
+        }
+      } catch (err) {
+        alert('登录失败，请检查网络或后端服务状态！');
+      }
+    }
+
+    function handleAdminLogout() {
+      adminToken = null;
+      sessionStorage.removeItem('admin_token');
+      setAdminState(false);
+      document.getElementById('adminPassword').value = '';
+      closeModal('aboutModal');
+    }
+
+    function openEditCardModal(e, id) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isAdmin && !userSettings.showEditButtons) {
+        alert('请先登录管理员。');
+        return;
+      }
+      const cardEl = document.querySelector(`[data-id="${id}"]`);
+      if (!cardEl) return;
+      document.getElementById('editCardId').value = id;
+      const data = cardCustoms[id] || {};
+      const defaults = cardDefaults[id] || {};
+      document.getElementById('editCardTitle').value = data.title || defaults.title || cardEl.querySelector('.card-title').innerText;
+      document.getElementById('editCardTitleEn').value = data.titleI18n?.en || defaults.titleEn || '';
+      document.getElementById('editCardTitleTw').value = data.titleI18n?.['zh-TW'] || defaults.titleTw || '';
+      document.getElementById('editCardDesc').value = data.desc || defaults.desc || cardEl.querySelector('.card-desc').innerText;
+      document.getElementById('editCardDescEn').value = data.descI18n?.en || defaults.descEn || '';
+      document.getElementById('editCardDescTw').value = data.descI18n?.['zh-TW'] || defaults.descTw || '';
+      document.getElementById('editCardUrl').value = cardEl.getAttribute('href') || data.url || '';
+      
+      const img = cardEl.querySelector('.card-icon img');
+      document.getElementById('editCardIcon').value = img ? img.getAttribute('src') : (data.icon || '');
+      
+      openModal('editCardModal');
+    }
+
+    async function handleSaveCardEdit(e) {
+      e.preventDefault();
+      if (!isAdmin) {
+        alert('请先登录管理员。');
+        return;
+      }
+      const id = document.getElementById('editCardId').value;
+      const title = document.getElementById('editCardTitle').value.trim();
+      const desc = document.getElementById('editCardDesc').value.trim();
+      const titleEn = document.getElementById('editCardTitleEn').value.trim();
+      const titleTw = document.getElementById('editCardTitleTw').value.trim();
+      const descEn = document.getElementById('editCardDescEn').value.trim();
+      const descTw = document.getElementById('editCardDescTw').value.trim();
+      const url = document.getElementById('editCardUrl').value.trim();
+      const icon = document.getElementById('editCardIcon').value.trim();
+
+      if (!id || !title || !url) {
+        alert('板块名称和跳转链接不能为空');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/cards`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({
+            id,
+            title,
+            desc,
+            titleI18n: { en: titleEn, 'zh-TW': titleTw },
+            descI18n: { en: descEn, 'zh-TW': descTw },
+            url,
+            icon
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.status === 401) {
+          alert('身份验证失效，请重新登录！');
+          handleAdminLogout();
+          return;
+        }
+
+        if (res.ok && data.success) {
+          closeModal('editCardModal');
+          await fetchCards();
+          applySettings();
+          alert('板块内容已保存！');
+        } else {
+          alert('保存板块修改失败：' + (data.error || data.message || ('HTTP ' + res.status)));
+        }
+      } catch (err) {
+        alert('保存失败，请检查网络状态：' + err.message);
+      }
+    }
+
+    function getCardText(id, data, field) {
+      const defaults = cardDefaults[id] || {};
+      const source = field === 'title' ? data.titleI18n : data.descI18n;
+      const fallback = field === 'title' ? (data.title || defaults.title) : (data.desc || defaults.desc);
+      return source?.[currentLanguage] || (currentLanguage === 'en' ? (field === 'title' ? defaults.titleEn : defaults.descEn) : currentLanguage === 'zh-TW' ? (field === 'title' ? defaults.titleTw : defaults.descTw) : fallback);
+    }
+    function applyCardData(id, data) {
+      const cardEl = document.querySelector(`[data-id="${id}"]`);
+      if (!cardEl) return;
+      cardEl.querySelector('.card-title').innerText = getCardText(id, data, 'title');
+      cardEl.querySelector('.card-desc').innerText = getCardText(id, data, 'desc');
+      if (data.url) {
+        try {
+          const cardUrl = new URL(data.url, window.location.origin);
+          if (cardUrl.hostname.toLowerCase() === 'luke') {
+            cardUrl.hostname = currentHost;
+          }
+          cardEl.setAttribute('href', cardUrl.toString());
+        } catch (error) {
+          cardEl.setAttribute('href', data.url);
+        }
+      }
+      if (data.icon) {
+        const iconContainer = cardEl.querySelector('.card-icon');
+        iconContainer.innerHTML = `<img src="${data.icon}" alt="${data.title || ''}">`;
+      }
+    }
+    function renderAllCardLanguages() {
+      document.querySelectorAll('.card[data-id]').forEach(card => {
+        const id = card.dataset.id;
+        applyCardData(id, cardCustoms[id] || {});
+      });
+    }
+
+    async function fetchCards() {
+      try {
+        const res = await fetch(`${API_BASE}/cards`);
+        if (res.ok) {
+          cardCustoms = await res.json();
+          Object.keys(cardCustoms).forEach(id => {
+            applyCardData(id, cardCustoms[id]);
+          });
+          applySettings();
+        }
+      } catch (err) {
+        console.error('获取卡片配置数据失败:', err);
+      }
+    }
+
+    function toggleOtherSectionInput(value) {
+      const otherGroup = document.getElementById('otherSectionGroup');
+      const otherInput = document.getElementById('otherSectionInput');
+      if (value === '其他') {
+        otherGroup.style.display = 'flex';
+        otherInput.required = true;
+      } else {
+        otherGroup.style.display = 'none';
+        otherInput.required = false;
+      }
+    }
+
+    function toggleSuggestionOtherSectionInput(value) {
+      const otherGroup = document.getElementById('suggestionOtherSectionGroup');
+      const otherInput = document.getElementById('suggestionOtherSectionInput');
+      if (value === '其他') {
+        otherGroup.style.display = 'flex';
+        otherInput.required = true;
+      } else {
+        otherGroup.style.display = 'none';
+        otherInput.required = false;
+      }
+    }
+
+    async function fetchBugs() {
+      try {
+        const res = await fetch(`${API_BASE}/bugs`);
+        if (res.ok) {
+          bugData = await res.json();
+          renderBugList();
+        }
+      } catch (err) {
+        console.error('获取 Bug 数据失败:', err);
+      }
+    }
+
+    async function handleBugSubmit(e) {
+      e.preventDefault();
+      const name = currentUser ? currentUser.username : document.getElementById('reporterName').value.trim();
+      if (!name) {
+        alert('请先登录后再提交 Bug');
+        return;
+      }
+      const dateTime = document.getElementById('reportDateTime').value.replace('T', ' ');
+      let section = document.getElementById('bugSection').value;
+      if (section === '其他') {
+        const custom = document.getElementById('otherSectionInput').value.trim();
+        section = custom ? `其他 (${custom})` : '其他';
+      }
+      const type = document.getElementById('bugType').value;
+      const detail = document.getElementById('bugDetail').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/bugs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, dateTime, section, type, detail })
+        });
+        if (res.ok) {
+          alert('Bug 汇报已成功提交！');
+          await fetchBugs();
+          const reporterName = document.getElementById('reporterName').value;
+          const reportDateTime = document.getElementById('reportDateTime').value;
+          document.getElementById('bugReportForm').reset();
+          document.getElementById('reporterName').value = reporterName;
+          document.getElementById('reportDateTime').value = reportDateTime;
+          toggleOtherSectionInput('');
+        }
+      } catch (err) {
+        alert('提交失败，请检查网络！');
+      }
+    }
+
+    async function resolveBug(id) {
+      try {
+        const res = await fetch(`${API_BASE}/bugs/${id}/resolve`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+        
+        if (res.status === 401) {
+          alert('身份验证失效，请重新登录！');
+          handleAdminLogout();
+          return;
+        }
+
+        if (!res.ok) throw new Error();
+        await fetchBugs();
+      } catch (err) {
+        alert('更新状态失败！');
+      }
+    }
+
+    function renderBugList() {
+      const container = document.getElementById('bugListContainer');
+      if (!bugData || bugData.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.85rem; text-align: center;">暂无历史 Bug 记录</p>';
+        return;
+      }
+
+      container.innerHTML = bugData.map(bug => `
+        <div class="bug-item" data-bug-id="${bug.id}">
+          <div class="bug-item-header">
+            <strong style="font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+              ${isAdmin ? `<input type="checkbox" class="admin-copy-select bug-copy-select" data-id="${bug.id}" ${selectedBugIds.has(bug.id) ? 'checked' : ''} aria-label="选择此 Bug">` : ''}
+              <span>${escapeHtml(bug.name)} <span style="font-weight:normal;color:var(--text-sub);font-size:0.8rem;">(${escapeHtml(bug.dateTime)})</span></span>
+            </strong>
+            <span class="bug-status-tag ${bug.resolved ? 'status-resolved' : 'status-unresolved'}">
+              ${bug.resolved ? '已解决' : '未解决'}
+            </span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-sub);">
+            <span>板块: ${escapeHtml(bug.section)}</span> | <span>类型: ${escapeHtml(bug.type)}</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-main); margin-top: 4px; word-break: break-all;">
+            ${escapeHtml(bug.detail)}
+          </p>
+          ${isAdmin && !bug.resolved ? `<button class="resolve-btn" onclick="resolveBug(${bug.id})">标记为解决完毕</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function fetchSuggestions() {
+      try {
+        const res = await fetch(`${API_BASE}/suggestions`);
+        if (res.ok) {
+          suggestionData = await res.json();
+          renderSuggestionList();
+        }
+      } catch (err) {
+        console.error('获取建议数据失败:', err);
+      }
+    }
+
+    async function handleSuggestionSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('suggestionReporterName').value;
+      const dateTime = document.getElementById('suggestionDateTime').value.replace('T', ' ');
+      let section = document.getElementById('suggestionSection').value;
+      if (section === '其他') {
+        const custom = document.getElementById('suggestionOtherSectionInput').value.trim();
+        section = custom ? `其他 (${custom})` : '其他';
+      }
+      const priority = document.getElementById('suggestionPriority').value;
+      const detail = document.getElementById('suggestionDetail').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/suggestions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, dateTime, section, priority, detail })
+        });
+        if (res.ok) {
+          alert('建议反馈已成功提交！感谢您的贡献！');
+          const reporterName = document.getElementById('suggestionReporterName').value;
+          const suggestionDateTime = document.getElementById('suggestionDateTime').value;
+          document.getElementById('suggestionReportForm').reset();
+          document.getElementById('suggestionReporterName').value = reporterName;
+          document.getElementById('suggestionDateTime').value = suggestionDateTime;
+          toggleSuggestionOtherSectionInput('');
+          await fetchSuggestions();
+        }
+      } catch (err) {
+        alert('提交失败，请检查网络！');
+      }
+    }
+
+    async function updateSuggestionStatus(id, status) {
+      try {
+        const res = await fetch(`${API_BASE}/suggestions/${id}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ status })
+        });
+        
+        if (res.status === 401) {
+          alert('身份验证失效，请重新登录！');
+          handleAdminLogout();
+          return;
+        }
+
+        if (!res.ok) throw new Error();
+        await fetchSuggestions();
+      } catch (err) {
+        alert('更新状态失败！');
+      }
+    }
+
+    function renderSuggestionList() {
+      const container = document.getElementById('suggestionListContainer');
+      if (!suggestionData || suggestionData.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.85rem; text-align: center;">暂无建议记录</p>';
+        return;
+      }
+
+      const statusMap = {
+        'pending': { label: '待审核', class: 'status-pending-tag' },
+        'accepted': { label: '已采纳', class: 'status-accepted-tag' },
+        'rejected': { label: '已拒绝', class: 'status-rejected-tag' }
+      };
+
+      const suggestionsNewestFirst = [...suggestionData].sort((a, b) => {
+        const aId = Number(a.id) || 0;
+        const bId = Number(b.id) || 0;
+        return bId - aId;
+      });
+
+      container.innerHTML = suggestionsNewestFirst.map(suggestion => {
+        const statusInfo = statusMap[suggestion.status] || statusMap['pending'];
+        return `
+            <div class="suggestion-item" data-suggestion-id="${suggestion.id}">
+            <div class="suggestion-item-header">
+                <strong style="font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+                  ${isAdmin ? `<input type="checkbox" class="admin-copy-select suggestion-copy-select" data-id="${suggestion.id}" ${selectedSuggestionIds.has(suggestion.id) ? 'checked' : ''} aria-label="选择此建议">` : ''}
+                  <span>${escapeHtml(suggestion.name)} <span style="font-weight:normal;color:var(--text-sub);font-size:0.8rem;">(${escapeHtml(suggestion.dateTime)})</span></span>
+                </strong>
+              <span class="status-tag-suggestion ${statusInfo.class}">${statusInfo.label}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-sub);">
+              <span>板块: ${escapeHtml(suggestion.section)}</span> | <span>优先级: ${escapeHtml(suggestion.priority)}</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-main); margin-top: 4px; word-break: break-all;">
+              ${escapeHtml(suggestion.detail)}
+            </p>
+            ${isAdmin && suggestion.status === 'pending' ? `
+              <div class="suggestion-actions">
+                <button class="reject-btn" onclick="updateSuggestionStatus(${suggestion.id}, 'rejected')">拒绝</button>
+                <button class="accept-btn" onclick="updateSuggestionStatus(${suggestion.id}, 'accepted')">采纳</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleCopySelection(event, set) {
+      const id = Number(event.target.dataset.id);
+      if (event.target.checked) set.add(id);
+      else set.delete(id);
+    }
+
+    async function copySelectedContent(items, selectedIds, emptyMessage) {
+      if (!isAdmin) return alert('只有管理员可以使用复制功能');
+      const content = items
+        .filter(item => selectedIds.has(Number(item.id)))
+        .map(item => String(item.detail || '').trim())
+        .filter(Boolean)
+        .join('\n\n');
+      if (!content) return alert(emptyMessage);
+      try {
+        await navigator.clipboard.writeText(content);
+        alert('已复制选中内容');
+      } catch (err) {
+        const helper = document.createElement('textarea');
+        helper.value = content;
+        helper.style.position = 'fixed';
+        helper.style.opacity = '0';
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand('copy');
+        helper.remove();
+        alert('已复制选中内容');
+      }
+    }
+
+    document.getElementById('bugListContainer').addEventListener('change', (event) => {
+      if (event.target.matches('.bug-copy-select')) toggleCopySelection(event, selectedBugIds);
+    });
+    document.getElementById('suggestionListContainer').addEventListener('change', (event) => {
+      if (event.target.matches('.suggestion-copy-select')) toggleCopySelection(event, selectedSuggestionIds);
+    });
+    document.getElementById('copySelectedBugsBtn').addEventListener('click', () => {
+      copySelectedContent(bugData, selectedBugIds, '请先选择要复制的 Bug');
+    });
+    document.getElementById('copySelectedSuggestionsBtn').addEventListener('click', () => {
+      copySelectedContent(suggestionData, selectedSuggestionIds, '请先选择要复制的建议');
+    });
+
+    async function fetchChangelogs() {
+      try {
+        const res = await fetch(`${API_BASE}/changelogs`);
+        if (res.ok) {
+          changelogData = await res.json();
+          if (changelogData.length > 0) {
+            document.getElementById('currentVerBadge').innerText = changelogData[0].version;
+          }
+          renderChangelogs();
+        }
+      } catch (err) {
+        console.error('获取更新日志失败:', err);
+      }
+    }
+
+    async function handleChangelogSubmit(e) {
+      e.preventDefault();
+      const version = document.getElementById('newVerTitle').value.trim();
+      const contentText = document.getElementById('newVerContent').value.trim();
+      const items = contentText.split('\n').filter(i => i.trim() !== '');
+
+      try {
+        const res = await fetch(`${API_BASE}/changelogs`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ version, items })
+        });
+
+        if (res.status === 401) {
+          alert('身份验证失效，请重新登录！');
+          handleAdminLogout();
+          return;
+        }
+
+        if (res.ok) {
+          alert('更新日志发布成功！');
+          document.getElementById('newVerTitle').value = '';
+          document.getElementById('newVerContent').value = '';
+          await fetchChangelogs();
+        }
+      } catch (err) {
+        alert('发布失败，请重试！');
+      }
+    }
+
+    function renderChangelogs() {
+      const container = document.getElementById('changelogListContainer');
+      if (!changelogData || changelogData.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.85rem; text-align: center;">暂无更新记录</p>';
+        return;
+      }
+
+      container.innerHTML = changelogData.map((item, index) => `
+        <div style="border-left: 2px solid ${index === 0 ? 'var(--accent-color)' : 'var(--card-border)'}; padding-left: 12px;">
+          <h3 class="changelog-version" data-no-translate="true" style="font-size: ${index === 0 ? '1rem' : '0.9rem'}; color: ${index === 0 ? 'var(--accent-hover)' : 'var(--text-main)'};">
+            ${escapeHtml(item.version)} ${index === 0 ? '<span style="font-size: 0.75rem; color: var(--text-sub); font-weight: normal;">(当前版本)</span>' : ''}
+            ${isAdmin ? `<button class="nav-btn" type="button" style="float:right; padding:3px 8px; font-size:.75rem;" onclick="editChangelog('${escapeHtml(item.version)}')">编辑内容</button>` : ''}
+          </h3>
+          <ul style="color: var(--text-sub); font-size: 0.85rem; margin-top: 6px; padding-left: 18px; line-height: 1.6;">
+            ${item.items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+    }
+
+    async function editChangelog(version) {
+      if (!isAdmin) return;
+      const item = changelogData.find(entry => String(entry.version) === String(version));
+      if (!item) return;
+      const value = prompt(`编辑 ${version} 的更新内容（每行一条）`, item.items.join('\n'));
+      if (value === null) return;
+      const items = value.split('\n').map(line => line.trim()).filter(Boolean);
+      if (!items.length) return alert('更新内容不能为空');
+      const res = await fetch(`${API_BASE}/changelogs/${encodeURIComponent(version)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ items })
+      });
+      if (!res.ok) return alert('保存更新内容失败');
+      await fetchChangelogs();
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[match]);
+    }
+
+    let currentLanguage = 'zh-CN';
+    const translations = {
+      'en': {
+        '服务器导航': 'Server Navigation', '登录 / 注册': 'Log in / Sign up', '加入服务器': 'Join Server',
+        '更新日志': 'Changelog', '关于': 'About', '设置': 'Settings', '服务器导航入口': 'Server Services',
+        '点击下方卡片即可快速跳转至对应服务站点': 'Select a card to open a service',
+        '世界地图导航': 'World Maps', '工具与资源': 'Tools and Resources', '反馈与支持': 'Feedback and Support',
+        '服务器公告': 'Server Notices', '资源下载': 'Resource Downloads', '在线聊天室': 'Online Chat',
+        'Bug 汇报与记录': 'Bug Reports', '建议与优化': 'Suggestions', '登录管理员系统': 'Log in as administrator',
+        '退出管理员账户': 'Log out administrator',
+        '编辑': 'Edit', '主世界地图': 'Overworld Map', '下界地图': 'Nether Map', '末地地图': 'End Map', '交通线路图': 'Transit Network Map',
+        'Opanel': 'Opanel', '待填写描述': 'Description pending'
+      },
+      'zh-TW': {
+        '服务器导航': '伺服器導覽', '登录 / 注册': '登入 / 註冊', '加入服务器': '加入伺服器',
+        '更新日志': '更新日誌', '关于': '關於', '设置': '設定', '服务器导航入口': '伺服器服務',
+        '点击下方卡片即可快速跳转至对应服务站点': '點選卡片即可開啟服務',
+        '世界地图导航': '世界地圖導覽', '工具与资源': '工具與資源', '反馈与支持': '回饋與支援',
+        '服务器公告': '伺服器公告', '资源下载': '資源下載', '在线聊天室': '線上聊天室',
+        'Bug 汇报与记录': 'Bug 回報', '建议与优化': '建議與優化', '登录管理员系统': '登入管理員系統',
+        '退出管理员账户': '登出管理員帳戶', '编辑': '編輯', '主世界地图': '主世界地圖', '下界地图': '下界地圖', '末地地图': '末地地圖', '交通线路图': '交通路線圖',
+        'Opanel': 'Opanel', '待填写描述': '待填寫描述'
+      }
+    };
+
+    function applyLanguage(language) {
+      currentLanguage = language;
+      const dictionary = translations[language] || {};
+      document.querySelectorAll('body *').forEach(element => {
+        if (
+          element.children.length ||
+          element.tagName === 'SCRIPT' ||
+          element.tagName === 'STYLE' ||
+          element.dataset.noTranslate === 'true' ||
+          element.closest('.version-badge, .changelog-version')
+        ) return;
+        const original = element.dataset.i18nSource || (element.dataset.i18nSource = element.textContent.trim());
+        element.textContent = language === 'zh-CN' ? original : (dictionary[original] || original);
+      });
+      renderAllCardLanguages();
+      localStorage.setItem('webserve-language', language);
+    }
+
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+      languageSelect.value = localStorage.getItem('webserve-language') || 'zh-CN';
+      languageSelect.addEventListener('change', () => applyLanguage(languageSelect.value));
+      applyLanguage(languageSelect.value);
+    }
+    document.body.classList.add('page-ready');
+  </script>
+</body>
+</html>
