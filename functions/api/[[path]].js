@@ -94,6 +94,8 @@ async function handleRequest(request, env) {
     if (path === 'download/list' && method === 'GET') return handleDownloadList(env);
     if (path === 'download/upload' && method === 'POST') return handleDownloadUpload(request, env);
     if (path === 'download/delete' && method === 'POST') return handleDownloadDelete(request, env);
+    if (path === 'uploads' && method === 'GET') return handleDownloadList(env);
+    if (path.startsWith('uploads/') && method === 'GET') return handleFileGet(request, env, `files/${path.slice('uploads/'.length)}`, url);
     if (path === 'file/upload' && method === 'POST') return handleDownloadUpload(request, env);
     if (path === 'file/delete' && method === 'POST') return handleFileDelete(request, env);
     if (path === 'file/batch-delete' && method === 'POST') return handleFileBatchDelete(request, env);
@@ -143,6 +145,10 @@ async function putJSON(env, key, value) {
 
 function getKV(env) {
   return env.NAV_KV || env.MY_KV;
+}
+
+function getResourceBucket(env) {
+  return env.FILES || env.UPLOADS;
 }
 
 function getSecret(env) {
@@ -544,8 +550,9 @@ async function handleSuggestionStatus(request, env, path) {
 /* ================= 下载中心 ================= */
 
 async function handleDownloadList(env) {
-  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
-  const list = await env.UPLOADS.list({ prefix: 'files/' });
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
+  const list = await bucket.list({ prefix: 'files/' });
   const files = list.objects.map(item => {
     const rawName = item.key.replace(/^files\//, '');
     const name = rawName.replace(/^\d+_[a-f0-9]+_/, '');
@@ -562,16 +569,17 @@ async function handleDownloadList(env) {
 
 async function handleDownloadUpload(request, env) {
   if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
-  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
   const form = await request.formData();
-  const files = form.getAll('files');
+  const files = form.getAll('files').concat(form.getAll('file'));
   if (!files.length) return json({ error: '未收到文件' }, 400);
   let count = 0;
   for (const file of files) {
     if (typeof file === 'string') continue;
     const safeName = (file.name || 'file').replace(/[^a-zA-Z0-9._\-\u4e00-\u9fa5]/g, '_');
     const key = 'files/' + Date.now() + '_' + Math.random().toString(16).slice(2, 10) + '_' + safeName;
-    await env.UPLOADS.put(key, await file.arrayBuffer(), {
+    await bucket.put(key, await file.arrayBuffer(), {
       httpMetadata: { contentType: file.type || 'application/octet-stream' }
     });
     count++;
@@ -584,16 +592,18 @@ async function handleDownloadDelete(request, env) {
   const body = await request.json().catch(() => ({}));
   const key = String(body.key || '').trim();
   if (!key || !key.startsWith('files/')) return json({ error: '非法路径' }, 400);
-  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
-  await env.UPLOADS.delete(key);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
+  await bucket.delete(key);
   return json({ success: true });
 }
 
 async function handleFileGet(request, env, path, url) {
-  if (!env.UPLOADS) return new Response('未绑定 R2 桶 UPLOADS', { status: 500 });
+  const bucket = getResourceBucket(env);
+  if (!bucket) return new Response('未绑定资源 R2 桶 FILES', { status: 500 });
   const key = decodeURIComponent(path.slice('files/'.length));
   if (!key || key.includes('..') || key.startsWith('/')) return new Response('非法路径', { status: 400 });
-  const object = await env.UPLOADS.get(key.startsWith('files/') ? key : `files/${key}`);
+  const object = await bucket.get(key.startsWith('files/') ? key : `files/${key}`);
   if (!object) return new Response('Not Found', { status: 404 });
   const headers = {
     'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
@@ -608,27 +618,30 @@ async function handleFileGet(request, env, path, url) {
 
 async function handleFileDelete(request, env) {
   if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
-  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
   const body = await request.json().catch(() => ({}));
   const key = String(body.key || '').trim();
   if (!key || key.includes('..')) return json({ error: '非法路径' }, 400);
-  await env.UPLOADS.delete(key.startsWith('files/') ? key : `files/${key}`);
+  await bucket.delete(key.startsWith('files/') ? key : `files/${key}`);
   return json({ success: true });
 }
 
 async function handleFileBatchDelete(request, env) {
   if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
-  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
   const body = await request.json().catch(() => ({}));
   const keys = Array.isArray(body.keys) ? [...new Set(body.keys.map(value => String(value || '').trim()).filter(Boolean))] : [];
   if (!keys.length || keys.some(key => key.includes('..'))) return json({ error: '未选择有效文件' }, 400);
-  await env.UPLOADS.delete(keys.map(key => key.startsWith('files/') ? key : `files/${key}`));
+  await bucket.delete(keys.map(key => key.startsWith('files/') ? key : `files/${key}`));
   return json({ success: true, deleted: keys });
 }
 
 async function handleFileRename(request, env) {
   if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
-  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const bucket = getResourceBucket(env);
+  if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
   const body = await request.json().catch(() => ({}));
   const oldKey = String(body.key || '').trim();
   const newName = String(body.newName || body.name || '').trim();
@@ -637,10 +650,10 @@ async function handleFileRename(request, env) {
   }
   const sourceKey = oldKey.startsWith('files/') ? oldKey : `files/${oldKey}`;
   const targetKey = `files/${newName}`;
-  const source = await env.UPLOADS.get(sourceKey);
+  const source = await bucket.get(sourceKey);
   if (!source) return json({ error: '文件不存在' }, 404);
-  await env.UPLOADS.put(targetKey, source.body, { httpMetadata: source.httpMetadata });
-  await env.UPLOADS.delete(sourceKey);
+  await bucket.put(targetKey, source.body, { httpMetadata: source.httpMetadata });
+  await bucket.delete(sourceKey);
   return json({ success: true, key: targetKey });
 }
 
