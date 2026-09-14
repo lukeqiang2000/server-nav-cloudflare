@@ -717,6 +717,99 @@
       padding: 4px 12px;
     }
 
+    /* ===== 设置面板样式 ===== */
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+    .settings-item-info {
+      flex: 1;
+      padding-right: 16px;
+    }
+    .settings-item-title {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .settings-item-desc {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    /* 开关样式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255,255,255,0.15);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider {
+      background-color: var(--accent-color);
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .settings-section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      margin-top: 20px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .settings-section-title:first-child {
+      margin-top: 0;
+    }
+
+    .settings-danger-btn {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .settings-danger-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
     @media (max-width: 640px) {
       .top-nav {
         flex-wrap: wrap;
@@ -756,6 +849,7 @@
       </div>
       <button class="nav-btn" onclick="showServerWelcome()">加入服务器</button>
       <button class="nav-btn" onclick="openChangelogModal()">更新日志</button>
+      <button class="nav-btn" onclick="openSettingsModal()">设置</button>
       <button class="nav-btn" onclick="openAboutModal()">关于</button>
       <label class="language-picker" title="Language">
         <span class="sr-only">Language</span>
@@ -777,28 +871,28 @@
     <main>
       <div class="section-title">世界地图导航</div>
       <div class="grid" id="gridWorld">
-        <a href="" class="card" target="_blank" data-id="overworld" data-port="8080" data-path="/?world=minecraft_overworld&zoom=4&x=0&z=0">
+        <a href="" class="card" data-id="overworld" data-port="8080" data-path="/?world=minecraft_overworld&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'overworld')">编辑</button>
           <div class="card-icon"><img src="resource/grassblock.webp" alt="主世界"></div>
           <div class="card-info"><div class="card-title">主世界地图</div><div class="card-desc">Overworld Map</div></div>
           <span class="arrow">→</span>
         </a>
 
-        <a href="" class="card" target="_blank" data-id="nether" data-port="8080" data-path="/?world=minecraft_the_nether&zoom=4&x=0&z=0">
+        <a href="" class="card" data-id="nether" data-port="8080" data-path="/?world=minecraft_the_nether&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'nether')">编辑</button>
           <div class="card-icon"><img src="resource/netherrack.webp" alt="下界"></div>
           <div class="card-info"><div class="card-title">下界地图</div><div class="card-desc">Nether Map</div></div>
           <span class="arrow">→</span>
         </a>
 
-        <a href="" class="card" target="_blank" data-id="end" data-port="8080" data-path="/?world=minecraft_the_end&zoom=4&x=0&z=0">
+        <a href="" class="card" data-id="end" data-port="8080" data-path="/?world=minecraft_the_end&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'end')">编辑</button>
           <div class="card-icon"><img src="resource/BlockSprite_end-stone.webp" alt="末地"></div>
           <div class="card-info"><div class="card-title">末地地图</div><div class="card-desc">End Map</div></div>
           <span class="arrow">→</span>
         </a>
 
-        <a href="" class="card" target="_blank" data-id="transit" data-port="8888" data-path="/">
+        <a href="" class="card" data-id="transit" data-port="8888" data-path="/">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'transit')">编辑</button>
           <div class="card-icon"><img src="resource/logo_5.png" alt="交通线路图"></div>
           <div class="card-info"><div class="card-title">交通线路图</div><div class="card-desc">Transit Network Map</div></div>
@@ -822,28 +916,28 @@
 
       <div class="section-title">工具与资源</div>
       <div class="grid" id="gridTools">
-        <a href="" class="card" target="_blank" data-id="notice" data-port="6778" data-path="/">
+        <a href="" class="card" data-id="notice" data-port="6778" data-path="/">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'notice')">编辑</button>
           <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
           <div class="card-info"><div class="card-title">服务器公告</div><div class="card-desc">最新动态与维护通知</div></div>
           <span class="arrow">→</span>
         </a>
 
-        <a href="" class="card" target="_blank" data-id="download" data-port="25008" data-path="/">
+        <a href="" class="card" data-id="download" data-port="25008" data-path="/">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'download')">编辑</button>
           <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
           <div class="card-info"><div class="card-title">资源下载</div><div class="card-desc">整合包 / 客户端下载</div></div>
           <span class="arrow">→</span>
         </a>
 
-        <a href="" class="card" target="_blank" data-id="chat" data-port="7891" data-path="/">
+        <a href="" class="card" data-id="chat" data-port="7891" data-path="/">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'chat')">编辑</button>
           <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
           <div class="card-info"><div class="card-title">在线聊天室</div><div class="card-desc">玩家实时沟通交流</div></div>
           <span class="arrow">→</span>
         </a>
 
-        <a href="" class="card" target="_blank" data-id="opanel">
+        <a href="" class="card" data-id="opanel">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'opanel')">编辑</button>
           <div class="card-icon"><img src="resource/opanel.png" alt="Opanel"></div>
           <div class="card-info"><div class="card-title">Opanel</div><div class="card-desc">待填写描述</div></div>
@@ -896,6 +990,50 @@
           <p style="color: var(--success-color); font-size: 0.85rem; margin-bottom: 12px;">已解锁管理员权限！您现在可以直接编辑卡片或新增版本日志。</p>
           <button class="submit-btn" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);" onclick="handleAdminLogout()">退出管理员账户</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>设置</h2>
+        <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+      </div>
+
+      <div class="settings-section-title">浏览行为</div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <div class="settings-item-title">在新标签页打开卡片</div>
+          <div class="settings-item-desc">关闭时，点击卡片会在当前页面直接跳转；开启时，会打开新的标签页。</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingOpenInNewTab" onchange="handleSettingChange('openInNewTab', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <div class="settings-item-title">显示卡片编辑按钮</div>
+          <div class="settings-item-desc">即使未登录管理员，也显示编辑按钮（编辑仍需要管理员密码）。</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingShowEditButtons" onchange="handleSettingChange('showEditButtons', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-section-title">数据</div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <div class="settings-item-title">清除本地缓存</div>
+          <div class="settings-item-desc">清除语言、设置、管理员登录态等本地存储。不影响服务器上的数据。</div>
+        </div>
+        <button class="settings-danger-btn" onclick="handleClearLocalStorage()">清除</button>
       </div>
     </div>
   </div>
@@ -1156,8 +1294,8 @@
             <div class="profile-username" id="profileUsername">@username</div>
             <div class="profile-bio" id="profileBio">这个人很懒，什么都没有写~</div>
             <div class="profile-stats">
-              <span>?? 加入: <span id="profileJoined">--</span></span>
-              <span>?? 最后活跃: <span id="profileLastActive">--</span></span>
+              <span>📅 加入: <span id="profileJoined">--</span></span>
+              <span>🕒 最后活跃: <span id="profileLastActive">--</span></span>
             </div>
           </div>
         </div>
@@ -1182,7 +1320,7 @@
               <label style="font-size: 0.8rem; color: var(--text-sub);">更换头像</label>
               <div class="file-upload-wrapper">
                 <div class="file-upload-label">
-                  <span>??? 选择图片</span>
+                  <span>🖼️ 选择图片</span>
                   <span class="file-name" id="avatarFileName">未选择</span>
                 </div>
                 <input type="file" id="avatarFileInput" accept="image/*" onchange="uploadAvatar(this)">
@@ -1192,7 +1330,7 @@
               <label style="font-size: 0.8rem; color: var(--text-sub);">更换背景</label>
               <div class="file-upload-wrapper">
                 <div class="file-upload-label">
-                  <span>?? 选择文件</span>
+                  <span>📁 选择文件</span>
                   <span class="file-name" id="bgFileName">未选择</span>
                 </div>
                 <input type="file" id="bgFileInput" accept="image/*,video/*" onchange="uploadBackground(this)">
@@ -1224,6 +1362,68 @@
     const selectedSuggestionIds = new Set();
     let changelogData = [];
     let cardCustoms = {};
+
+    /* ===== 用户设置 ===== */
+    const SETTINGS_KEY = 'webserve-settings';
+    const defaultSettings = {
+      openInNewTab: false,
+      showEditButtons: false
+    };
+    let userSettings = loadSettings();
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return { ...defaultSettings };
+        return { ...defaultSettings, ...JSON.parse(raw) };
+      } catch (e) {
+        return { ...defaultSettings };
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+    }
+
+    function handleSettingChange(key, value) {
+      userSettings[key] = value;
+      saveSettings();
+      applySettings();
+    }
+
+    function applySettings() {
+      // 应用卡片打开方式
+      document.querySelectorAll('.card[data-id]').forEach(card => {
+        if (userSettings.openInNewTab) {
+          card.setAttribute('target', '_blank');
+          card.setAttribute('rel', 'noopener noreferrer');
+        } else {
+          card.removeAttribute('target');
+          card.removeAttribute('rel');
+        }
+      });
+
+      // 应用编辑按钮显示
+      if (!isAdmin && userSettings.showEditButtons) {
+        document.querySelectorAll('.edit-card-btn').forEach(btn => btn.style.display = 'block');
+      }
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settingOpenInNewTab').checked = !!userSettings.openInNewTab;
+      document.getElementById('settingShowEditButtons').checked = !!userSettings.showEditButtons;
+      openModal('settingsModal');
+    }
+
+    function handleClearLocalStorage() {
+      if (!confirm('确定清除本地缓存吗？\n\n会清除：语言、设置、管理员登录态。\n不会影响：服务器上的数据、已保存的 Bug、公告、用户账号。')) return;
+      localStorage.removeItem('webserve-language');
+      localStorage.removeItem(SETTINGS_KEY);
+      sessionStorage.removeItem('admin_token');
+      alert('已清除，页面即将刷新。');
+      location.reload();
+    }
+
     const cardDefaults = {
       overworld: { title: '主世界地图', desc: 'Overworld Map', titleEn: 'Overworld Map', descEn: 'Overworld Map', titleTw: '主世界地圖', descTw: '主世界地圖' },
       nether: { title: '下界地图', desc: 'Nether Map', titleEn: 'Nether Map', descEn: 'Nether Map', titleTw: '下界地圖', descTw: '下界地圖' },
@@ -1237,6 +1437,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initCardLinks();
+      applySettings();
       fetchCards();
       fetchBugs();
       fetchSuggestions();
@@ -1645,7 +1846,9 @@
       document.getElementById('loginArea').style.display = active ? 'none' : 'block';
       document.getElementById('loggedArea').style.display = active ? 'block' : 'none';
       document.getElementById('adminBadge').style.display = active ? 'inline-block' : 'none';
-      document.querySelectorAll('.edit-card-btn').forEach(btn => btn.style.display = active ? 'block' : 'none');
+      document.querySelectorAll('.edit-card-btn').forEach(btn => {
+        btn.style.display = active || userSettings.showEditButtons ? 'block' : 'none';
+      });
       document.getElementById('adminChangelogAddForm').style.display = active ? 'block' : 'none';
       document.getElementById('copySelectedBugsBtn').style.display = active ? 'inline-block' : 'none';
       document.getElementById('copySelectedSuggestionsBtn').style.display = active ? 'inline-block' : 'none';
@@ -1747,6 +1950,10 @@
     function openEditCardModal(e, id) {
       e.preventDefault();
       e.stopPropagation();
+      if (!isAdmin && !userSettings.showEditButtons) {
+        alert('请先登录管理员。');
+        return;
+      }
       const cardEl = document.querySelector(`[data-id="${id}"]`);
       if (!cardEl) return;
       document.getElementById('editCardId').value = id;
@@ -1768,6 +1975,10 @@
 
     async function handleSaveCardEdit(e) {
       e.preventDefault();
+      if (!isAdmin) {
+        alert('请先登录管理员。');
+        return;
+      }
       const id = document.getElementById('editCardId').value;
       const title = document.getElementById('editCardTitle').value.trim();
       const desc = document.getElementById('editCardDesc').value.trim();
@@ -1812,6 +2023,7 @@
         if (res.ok && data.success) {
           closeModal('editCardModal');
           await fetchCards();
+          applySettings();
           alert('板块内容已保存！');
         } else {
           alert('保存板块修改失败：' + (data.error || data.message || ('HTTP ' + res.status)));
@@ -1863,6 +2075,7 @@
           Object.keys(cardCustoms).forEach(id => {
             applyCardData(id, cardCustoms[id]);
           });
+          applySettings();
         }
       } catch (err) {
         console.error('获取卡片配置数据失败:', err);
@@ -2245,7 +2458,7 @@
     const translations = {
       'en': {
         '服务器导航': 'Server Navigation', '登录 / 注册': 'Log in / Sign up', '加入服务器': 'Join Server',
-        '更新日志': 'Changelog', '关于': 'About', '服务器导航入口': 'Server Services',
+        '更新日志': 'Changelog', '关于': 'About', '设置': 'Settings', '服务器导航入口': 'Server Services',
         '点击下方卡片即可快速跳转至对应服务站点': 'Select a card to open a service',
         '世界地图导航': 'World Maps', '工具与资源': 'Tools and Resources', '反馈与支持': 'Feedback and Support',
         '服务器公告': 'Server Notices', '资源下载': 'Resource Downloads', '在线聊天室': 'Online Chat',
@@ -2256,7 +2469,7 @@
       },
       'zh-TW': {
         '服务器导航': '伺服器導覽', '登录 / 注册': '登入 / 註冊', '加入服务器': '加入伺服器',
-        '更新日志': '更新日誌', '关于': '關於', '服务器导航入口': '伺服器服務',
+        '更新日志': '更新日誌', '关于': '關於', '设置': '設定', '服务器导航入口': '伺服器服務',
         '点击下方卡片即可快速跳转至对应服务站点': '點選卡片即可開啟服務',
         '世界地图导航': '世界地圖導覽', '工具与资源': '工具與資源', '反馈与支持': '回饋與支援',
         '服务器公告': '伺服器公告', '资源下载': '資源下載', '在线聊天室': '線上聊天室',

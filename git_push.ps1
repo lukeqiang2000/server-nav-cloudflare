@@ -1,6 +1,15 @@
 # 自动推送.ps1
 Set-Location -Path $PSScriptRoot
 
+# ========== 配置 ==========
+# 推送成功后自动打开的页面（Cloudflare Pages 项目地址）
+$CF_URL = "https://dash.cloudflare.com/eecbc277b5e57bd77a4f2720318478b8/pages/view/dolphinserver"
+
+# 是否推送成功后自动打开浏览器
+# 1 = 自动打开，0 = 询问后打开
+$AUTO_OPEN = 1
+# ==========================
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "   Git 自动检测并推送" -ForegroundColor Cyan
@@ -40,6 +49,7 @@ if ($changes -eq 0) {
             exit 1
         }
         Write-Host "[完成] 已推送到远程。" -ForegroundColor Green
+        Open-Cloudflare
     } else {
         Write-Host "[跳过] 已取消。"
     }
@@ -93,4 +103,22 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host "   [成功] 已提交并推送到远程" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
+
+Open-Cloudflare
+
 Read-Host "按回车退出"
+
+
+function Open-Cloudflare {
+    if ([string]::IsNullOrWhiteSpace($CF_URL)) { return }
+    if ($AUTO_OPEN -eq 1) {
+        Write-Host "[打开] Cloudflare 控制台..." -ForegroundColor Cyan
+        Start-Process $CF_URL
+        return
+    }
+    $openNow = Read-Host "是否打开 Cloudflare 控制台？(Y/N)"
+    if ($openNow -match '^[Yy]') {
+        Write-Host "[打开] $CF_URL" -ForegroundColor Cyan
+        Start-Process $CF_URL
+    }
+}
