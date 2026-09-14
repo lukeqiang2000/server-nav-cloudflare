@@ -45,11 +45,11 @@ async function handleRequest(request, env) {
       return handleUploads(request, env, path, url);
     }
 
+    if ((path === 'login' || path === 'admin/login') && method === 'POST') return handleAdminLogin(request, env);
+
     if (!getKV(env)) {
       return json({ error: '未绑定 KV 命名空间 NAV_KV 或 MY_KV' }, 500);
     }
-
-    if ((path === 'login' || path === 'admin/login') && method === 'POST') return handleAdminLogin(request, env);
 
     if (path === 'site-config') {
       if (method === 'GET') return handleSiteConfigGet(env);
