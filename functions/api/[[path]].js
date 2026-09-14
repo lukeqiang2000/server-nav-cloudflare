@@ -91,10 +91,10 @@ async function handleRequest(request, env) {
     }
 
     // 下载中心
-    if (path === 'download/list' && method === 'GET') return handleDownloadList(env);
+    if (path === 'download/list' && method === 'GET') return handleDownloadList(request, env, url);
     if (path === 'download/upload' && method === 'POST') return handleDownloadUpload(request, env);
     if (path === 'download/delete' && method === 'POST') return handleDownloadDelete(request, env);
-    if (path === 'uploads' && method === 'GET') return handleDownloadList(env);
+    if (path === 'uploads' && method === 'GET') return handleDownloadList(request, env, url);
     if (path.startsWith('uploads/') && method === 'GET') return handleFileGet(request, env, `files/${path.slice('uploads/'.length)}`, url);
     if (path === 'file/upload' && method === 'POST') return handleDownloadUpload(request, env);
     if (path === 'file/delete' && method === 'POST') return handleFileDelete(request, env);
@@ -562,14 +562,31 @@ async function handleSuggestionStatus(request, env, path) {
 
 /* ================= 下载中心 ================= */
 
-async function handleDownloadList(env) {
+async function handleDownloadList(request, env, url) {
   const bucket = getResourceBucket(env);
   if (!bucket) return json({ error: '未绑定资源 R2 桶 FILES' }, 500);
-  const list = await bucket.list({ prefix: 'files/' });
+  let requestedPath = url.searchParams.get('path') || '';
+  if (!requestedPath) {
+    const refererHeader = request.headers.get('Referer') || '';
+    const referer = refererHeader ? new URL(refererHeader).pathname : '';
+    if (referer.startsWith('/download/')) requestedPath = decodeURIComponent(referer.slice('/download/'.length));
+  }
+  const relPath = normalizeFolderKey(requestedPath);
+  if (!relPath) {
+    const marker = `files/.folders/${encodeURIComponent('Userfolder')}`;
+    if (!(await bucket.head(marker))) {
+      await bucket.put(marker, JSON.stringify({ key: 'Userfolder', createdAt: new Date().toISOString() }), {
+        httpMetadata: { contentType: 'application/json' }
+      });
+    }
+
+  }
+  const prefix = `files/${relPath ? `${relPath}/` : ''}`;
+  const list = await bucket.list({ prefix });
   const files = list.objects.map(item => {
-    const rawName = item.key.replace(/^files\//, '');
+    const rawName = item.key.slice(prefix.length);
+    if (!rawName || rawName.includes('/') || item.key.startsWith('files/.folders/')) return null;
     const name = rawName.replace(/^\d+_[a-f0-9]+_/, '');
-    if (rawName.startsWith('.folders/')) return null;
     return {
       key: item.key,
       name: name || rawName,
@@ -577,9 +594,13 @@ async function handleDownloadList(env) {
       uploaded: item.uploaded ? item.uploaded.toISOString() : new Date().toISOString()
     };
   }).filter(Boolean);
-  const folders = list.objects
-    .filter(item => item.key.startsWith('files/.folders/'))
-    .map(item => decodeURIComponent(item.key.slice('files/.folders/'.length)));
+  const markers = await bucket.list({ prefix: 'files/.folders/' });
+  const folders = markers.objects
+    .map(item => decodeURIComponent(item.key.slice('files/.folders/'.length)))
+    .filter(key => {
+      const parent = key.includes('/') ? key.slice(0, key.lastIndexOf('/')) : '';
+      return parent === relPath;
+    });
   files.sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded));
   return json({ files, folders });
 }
