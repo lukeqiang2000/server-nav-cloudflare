@@ -45,8 +45,8 @@ async function handleRequest(request, env) {
       return handleUploads(request, env, path, url);
     }
 
-    if (!env.NAV_KV) {
-      return json({ error: '未绑定 KV 命名空间 NAV_KV' }, 500);
+    if (!getKV(env)) {
+      return json({ error: '未绑定 KV 命名空间 NAV_KV 或 MY_KV' }, 500);
     }
 
     if (path === 'login' && method === 'POST') return handleAdminLogin(request, env);
@@ -94,6 +94,12 @@ async function handleRequest(request, env) {
     if (path === 'download/list' && method === 'GET') return handleDownloadList(env);
     if (path === 'download/upload' && method === 'POST') return handleDownloadUpload(request, env);
     if (path === 'download/delete' && method === 'POST') return handleDownloadDelete(request, env);
+    if (path === 'file/upload' && method === 'POST') return handleDownloadUpload(request, env);
+    if (path === 'file/delete' && method === 'POST') return handleFileDelete(request, env);
+    if (path === 'file/batch-delete' && method === 'POST') return handleFileBatchDelete(request, env);
+    if (path === 'file/rename' && method === 'POST') return handleFileRename(request, env);
+    if (path === 'file/batch-download' && method === 'POST') return handleFileBatchDownload(request, env);
+    if (path.startsWith('files/') && method === 'GET') return handleFileGet(request, env, path, url);
 
     // 聊天室
     if (path === 'chat/messages' && method === 'GET') return handleChatGet(env, url);
@@ -127,12 +133,16 @@ function json(data, status = 200, headers = {}) {
 }
 
 async function getJSON(env, key, fallback) {
-  const value = await env.NAV_KV.get(key, { type: 'json' });
+  const value = await getKV(env).get(key, { type: 'json' });
   return value === null ? fallback : value;
 }
 
 async function putJSON(env, key, value) {
-  await env.NAV_KV.put(key, JSON.stringify(value));
+  await getKV(env).put(key, JSON.stringify(value));
+}
+
+function getKV(env) {
+  return env.NAV_KV || env.MY_KV;
 }
 
 function getSecret(env) {
@@ -264,18 +274,18 @@ function publicUser(user) {
 
 async function getUserById(env, userId) {
   if (!userId) return null;
-  return env.NAV_KV.get(userKey(userId), { type: 'json' });
+  return getKV(env).get(userKey(userId), { type: 'json' });
 }
 
 async function getUserByUsername(env, username) {
-  const id = await env.NAV_KV.get(userNameKey(username));
+  const id = await getKV(env).get(userNameKey(username));
   if (!id) return null;
   return getUserById(env, id);
 }
 
 async function saveUser(env, user) {
-  await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
-  await env.NAV_KV.put(userNameKey(user.username), user.id);
+  await getKV(env).put(userKey(user.id), JSON.stringify(user));
+  await getKV(env).put(userNameKey(user.username), user.id);
 }
 
 async function getCurrentUser(request, env) {
@@ -534,7 +544,7 @@ async function handleSuggestionStatus(request, env, path) {
 /* ================= 下载中心 ================= */
 
 async function handleDownloadList(env) {
-  if (!env.UPLOADS) return json({ files: [] });
+  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
   const list = await env.UPLOADS.list({ prefix: 'files/' });
   const files = list.objects.map(item => {
     const rawName = item.key.replace(/^files\//, '');
@@ -577,6 +587,66 @@ async function handleDownloadDelete(request, env) {
   if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
   await env.UPLOADS.delete(key);
   return json({ success: true });
+}
+
+async function handleFileGet(request, env, path, url) {
+  if (!env.UPLOADS) return new Response('未绑定 R2 桶 UPLOADS', { status: 500 });
+  const key = decodeURIComponent(path.slice('files/'.length));
+  if (!key || key.includes('..') || key.startsWith('/')) return new Response('非法路径', { status: 400 });
+  const object = await env.UPLOADS.get(key.startsWith('files/') ? key : `files/${key}`);
+  if (!object) return new Response('Not Found', { status: 404 });
+  const headers = {
+    'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
+    'Cache-Control': 'public, max-age=31536000'
+  };
+  if (url.searchParams.get('download') === '1') {
+    const filename = key.split('/').pop() || key;
+    headers['Content-Disposition'] = `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`;
+  }
+  return new Response(object.body, { headers });
+}
+
+async function handleFileDelete(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const key = String(body.key || '').trim();
+  if (!key || key.includes('..')) return json({ error: '非法路径' }, 400);
+  await env.UPLOADS.delete(key.startsWith('files/') ? key : `files/${key}`);
+  return json({ success: true });
+}
+
+async function handleFileBatchDelete(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const keys = Array.isArray(body.keys) ? [...new Set(body.keys.map(value => String(value || '').trim()).filter(Boolean))] : [];
+  if (!keys.length || keys.some(key => key.includes('..'))) return json({ error: '未选择有效文件' }, 400);
+  await env.UPLOADS.delete(keys.map(key => key.startsWith('files/') ? key : `files/${key}`));
+  return json({ success: true, deleted: keys });
+}
+
+async function handleFileRename(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  if (!env.UPLOADS) return json({ error: '未绑定 R2 桶 UPLOADS' }, 500);
+  const body = await request.json().catch(() => ({}));
+  const oldKey = String(body.key || '').trim();
+  const newName = String(body.newName || body.name || '').trim();
+  if (!oldKey || !newName || oldKey.includes('..') || newName.includes('/') || newName.includes('\\')) {
+    return json({ error: '非法文件名' }, 400);
+  }
+  const sourceKey = oldKey.startsWith('files/') ? oldKey : `files/${oldKey}`;
+  const targetKey = `files/${newName}`;
+  const source = await env.UPLOADS.get(sourceKey);
+  if (!source) return json({ error: '文件不存在' }, 404);
+  await env.UPLOADS.put(targetKey, source.body, { httpMetadata: source.httpMetadata });
+  await env.UPLOADS.delete(sourceKey);
+  return json({ success: true, key: targetKey });
+}
+
+async function handleFileBatchDownload(request, env) {
+  if (!(await requireAdmin(request, env))) return json({ error: '未授权' }, 401);
+  return json({ error: 'Cloudflare 版本暂不支持打包下载，请逐个下载文件' }, 501);
 }
 
 /* ================= 聊天室 ================= */
@@ -623,7 +693,7 @@ async function handleAuthRegister(request, env) {
   if (username.length < 3) return json({ error: '用户名至少3个字符' }, 400);
   if (password.length < 6) return json({ error: '密码至少6个字符' }, 400);
   if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(username)) return json({ error: '用户名包含非法字符' }, 400);
-  const exists = await env.NAV_KV.get(userNameKey(username));
+  const exists = await getKV(env).get(userNameKey(username));
   if (exists) return json({ error: '用户名已被占用' }, 400);
   const now = new Date().toISOString();
   const user = {
@@ -649,7 +719,7 @@ async function handleAuthLogin(request, env) {
   const inputHash = await hashPassword(password);
   if (inputHash !== user.passwordHash) return json({ error: '用户名或密码错误' }, 401);
   user.lastActive = new Date().toISOString();
-  await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
+  await getKV(env).put(userKey(user.id), JSON.stringify(user));
   const token = await createSessionToken(user.id, env);
   return json({ success: true, user: publicUser(user) }, 200, { 'Set-Cookie': sessionCookie(token, new URL(request.url)) });
 }
@@ -673,7 +743,7 @@ async function handleUserProfileUpdate(request, env) {
   if (body.displayName !== undefined) user.displayName = String(body.displayName || '').trim() || user.username;
   if (body.bio !== undefined) user.bio = String(body.bio || '').trim();
   user.lastActive = new Date().toISOString();
-  await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
+  await getKV(env).put(userKey(user.id), JSON.stringify(user));
   return json({ success: true, user: publicUser(user) });
 }
 
@@ -686,7 +756,7 @@ async function handleUserAvatarUpload(request, env) {
   const key = await saveUpload(env, file);
   user.avatar = `/api/uploads/${key}`;
   user.lastActive = new Date().toISOString();
-  await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
+  await getKV(env).put(userKey(user.id), JSON.stringify(user));
   return json({ success: true, avatar: user.avatar, user: publicUser(user) });
 }
 
@@ -699,18 +769,18 @@ async function handleUserBackgroundUpload(request, env) {
   const key = await saveUpload(env, file);
   user.background = `/api/uploads/${key}`;
   user.lastActive = new Date().toISOString();
-  await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
+  await getKV(env).put(userKey(user.id), JSON.stringify(user));
   return json({ success: true, background: user.background, user: publicUser(user) });
 }
 
 async function handleUserSearch(request, env, url) {
   const q = String(url.searchParams.get('q') || '').trim().toLowerCase();
   if (!q) return json([]);
-  const list = await env.NAV_KV.list({ prefix: 'user:' });
+  const list = await getKV(env).list({ prefix: 'user:' });
   const results = [];
   for (const key of list.keys) {
     if (key.name.startsWith('user:name:')) continue;
-    const user = await env.NAV_KV.get(key.name, { type: 'json' });
+    const user = await getKV(env).get(key.name, { type: 'json' });
     if (!user) continue;
     const username = String(user.username || '').toLowerCase();
     const displayName = String(user.displayName || '').toLowerCase();
