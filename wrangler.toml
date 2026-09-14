@@ -1,0 +1,14 @@
+name = "dolphinserver"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "MY_KV"
+id = "c6410fb15fcd40adabbea70a177d8e98"
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "webfiles"
+
+[[r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "uploads"
