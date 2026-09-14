@@ -751,9 +751,6 @@
     </div>
     <div class="nav-links">
       <span id="adminBadge" class="admin-status">已登录管理员</span>
-      <a class="nav-btn" href="/chat">聊天</a>
-      <a class="nav-btn" href="/board">公告</a>
-      <a class="nav-btn" href="/download">文件</a>
       <div id="userArea">
         <span class="user-badge-login" onclick="openAuthModal()">登录 / 注册</span>
       </div>
@@ -843,6 +840,13 @@
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'chat')">编辑</button>
           <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
           <div class="card-info"><div class="card-title">在线聊天室</div><div class="card-desc">玩家实时沟通交流</div></div>
+          <span class="arrow">→</span>
+        </a>
+
+        <a href="" class="card" target="_blank" data-id="opanel">
+          <button class="edit-card-btn" onclick="openEditCardModal(event, 'opanel')">编辑</button>
+          <div class="card-icon"><img src="resource/opanel.png" alt="Opanel"></div>
+          <div class="card-info"><div class="card-title">Opanel</div><div class="card-desc">待填写描述</div></div>
           <span class="arrow">→</span>
         </a>
       </div>
@@ -949,6 +953,7 @@
               <option value="服务器公告">服务器公告</option>
               <option value="资源下载">资源下载</option>
               <option value="在线聊天室">在线聊天室</option>
+              <option value="Opanel">Opanel</option>
               <option value="其他">其他</option>
             </select>
           </div>
@@ -1015,6 +1020,7 @@
               <option value="服务器公告">服务器公告</option>
               <option value="资源下载">资源下载</option>
               <option value="在线聊天室">在线聊天室</option>
+              <option value="Opanel">Opanel</option>
               <option value="整体体验">整体服务器体验</option>
               <option value="其他">其他</option>
             </select>
@@ -1225,7 +1231,8 @@
       transit: { title: '交通线路图', desc: 'Transit Network Map', titleEn: 'Transit Network Map', descEn: 'Transit Network Map', titleTw: '交通路線圖', descTw: '交通路線圖' },
       notice: { title: '服务器公告', desc: '最新动态与更新通知', titleEn: 'Server Notices', descEn: 'Latest updates and announcements', titleTw: '伺服器公告', descTw: '最新動態與更新通知' },
       download: { title: '资源下载', desc: '整合包 / 客户端下载', titleEn: 'Resource Downloads', descEn: 'Modpacks and client downloads', titleTw: '資源下載', descTw: '整合包 / 用戶端下載' },
-      chat: { title: '在线聊天室', desc: '玩家实时沟通交流', titleEn: 'Online Chat', descEn: 'Real-time player communication', titleTw: '線上聊天室', descTw: '玩家即時溝通交流' }
+      chat: { title: '在线聊天室', desc: '玩家实时沟通交流', titleEn: 'Online Chat', descEn: 'Real-time player communication', titleTw: '線上聊天室', descTw: '玩家即時溝通交流' },
+      opanel: { title: 'Opanel', desc: '待填写描述', titleEn: 'Opanel', descEn: 'Opanel Panel', titleTw: 'Opanel', descTw: '待填寫描述' }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -2244,7 +2251,8 @@
         '服务器公告': 'Server Notices', '资源下载': 'Resource Downloads', '在线聊天室': 'Online Chat',
         'Bug 汇报与记录': 'Bug Reports', '建议与优化': 'Suggestions', '登录管理员系统': 'Log in as administrator',
         '退出管理员账户': 'Log out administrator',
-        '编辑': 'Edit', '主世界地图': 'Overworld Map', '下界地图': 'Nether Map', '末地地图': 'End Map', '交通线路图': 'Transit Network Map'
+        '编辑': 'Edit', '主世界地图': 'Overworld Map', '下界地图': 'Nether Map', '末地地图': 'End Map', '交通线路图': 'Transit Network Map',
+        'Opanel': 'Opanel', '待填写描述': 'Description pending'
       },
       'zh-TW': {
         '服务器导航': '伺服器導覽', '登录 / 注册': '登入 / 註冊', '加入服务器': '加入伺服器',
@@ -2253,7 +2261,8 @@
         '世界地图导航': '世界地圖導覽', '工具与资源': '工具與資源', '反馈与支持': '回饋與支援',
         '服务器公告': '伺服器公告', '资源下载': '資源下載', '在线聊天室': '線上聊天室',
         'Bug 汇报与记录': 'Bug 回報', '建议与优化': '建議與優化', '登录管理员系统': '登入管理員系統',
-        '退出管理员账户': '登出管理員帳戶', '编辑': '編輯', '主世界地图': '主世界地圖', '下界地图': '下界地圖', '末地地图': '末地地圖', '交通线路图': '交通路線圖'
+        '退出管理员账户': '登出管理員帳戶', '编辑': '編輯', '主世界地图': '主世界地圖', '下界地图': '下界地圖', '末地地图': '末地地圖', '交通线路图': '交通路線圖',
+        'Opanel': 'Opanel', '待填写描述': '待填寫描述'
       }
     };
 
