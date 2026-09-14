@@ -16,10 +16,11 @@ window.io = function () {
   async function poll() {
     if (stopped || document.hidden) return;
     try {
-      const [messagesResponse, eventsResponse, usersResponse] = await Promise.all([
+      const [messagesResponse, eventsResponse, usersResponse, sessionResponse] = await Promise.all([
         fetch('/api/chat/messages?since=' + messageCursor, {credentials: 'include', cache: 'no-store'}),
         fetch('/api/chat/events?since=' + eventCursor, {credentials: 'include', cache: 'no-store'}),
-        fetch('/api/chat/users', {credentials: 'include', cache: 'no-store'})
+        fetch('/api/chat/users', {credentials: 'include', cache: 'no-store'}),
+        fetch('/api/auth/me', {credentials: 'include', cache: 'no-store'})
       ]);
       const messages = messagesResponse.ok ? (await messagesResponse.json()).messages || [] : [];
       messages.forEach(message => {
@@ -34,6 +35,16 @@ window.io = function () {
       const users = usersResponse.ok ? (await usersResponse.json()).users || [] : [];
       const registeredDetails = Object.fromEntries(users.map(user => [user.username, user]));
       emit('user list', {online: users.map(user => user.username), registeredDetails});
+      if (sessionResponse.ok) {
+        const session = await sessionResponse.json();
+        emit('user init success', {
+          userId: session.id,
+          username: session.username,
+          avatar: session.avatar || '',
+          bgImage: session.background || '',
+          bio: session.bio || ''
+        });
+      }
       emit('connect');
     } catch (error) {
       emit('disconnect', error);

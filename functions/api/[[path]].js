@@ -812,10 +812,15 @@ async function handleChatPost(request, env) {
   const messages = await getJSON(env, CHAT_KEY, []);
   const msg = {
     id: randomId(),
+    msgId: randomId(),
     userId: user.id,
     username: user.displayName || user.username,
+    from: user.username,
+    to: target?.username || '',
     avatar: user.avatar || '/api/uploads/default_avatar.png',
     text,
+    type: String(body.type || 'text'),
+    roomId: String(body.roomId || 'main'),
     timestamp: Date.now(),
     private: Boolean(target),
     targetUserId: target?.id || '',
