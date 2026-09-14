@@ -85,6 +85,12 @@ async function handleRequest(request, env) {
       return handleChangelogsPatch(request, env, path);
     }
 
+    // 公告
+    if (path === 'notices') {
+      if (method === 'GET') return handleNoticesGet(env);
+      if (method === 'POST') return handleNoticesPost(request, env);
+    }
+
     // Bug
     if (path === 'bugs') {
       if (method === 'GET') return handleBugsGet(env);
@@ -389,8 +395,6 @@ async function handleAdminLogin(request, env) {
 /* ================= SSE ================= */
 
 function handleStream() {
-  // Cloudflare 不适合长期 SSE 广播，这里返回一个可被 EventSource 接受的短流。
-  // 前端断开后会自动重连，不影响主要功能。
   const body = `retry: 30000\n\ndata: ${JSON.stringify({ type: 'connected' })}\n\n`;
   return new Response(body, {
     headers: {
@@ -491,29 +495,52 @@ async function handleCardsGet(env) {
 }
 
 async function handleCardsPost(request, env) {
-  if (!(await requireAdmin(request, env))) {
-    return json({ error: '未授权或登录已过期' }, 401);
+  try {
+    if (!(await requireAdmin(request, env))) {
+      return json({ error: '未授权或登录已过期' }, 401);
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: '请求数据格式错误' }, 400);
+    }
+
+    const id = String(body.id || '').trim();
+    if (!id) return json({ error: '缺少板块 ID' }, 400);
+
+    const cards = await getJSON(env, 'cards', {});
+    const previous = cards[id] || {};
+
+    const normalizeI18n = (source, prev) => {
+      const result = { ...(prev || {}) };
+      if (source && typeof source === 'object') {
+        Object.keys(source).forEach(lang => {
+          const value = source[lang];
+          if (value !== undefined && value !== null) {
+            result[lang] = String(value);
+          }
+        });
+      }
+      return result;
+    };
+
+    cards[id] = {
+      ...previous,
+      title: body.title !== undefined ? String(body.title) : (previous.title || ''),
+      desc: body.desc !== undefined ? String(body.desc) : (previous.desc || ''),
+      titleI18n: normalizeI18n(body.titleI18n, previous.titleI18n),
+      descI18n: normalizeI18n(body.descI18n, previous.descI18n),
+      url: body.url !== undefined ? String(body.url) : (previous.url || ''),
+      icon: body.icon !== undefined ? String(body.icon) : (previous.icon || '')
+    };
+
+    await putJSON(env, 'cards', cards);
+    return json({ success: true, card: cards[id] });
+  } catch (err) {
+    return json({ error: '保存失败：' + (err.message || '服务器内部错误') }, 500);
   }
-
-  const body = await request.json().catch(() => ({}));
-  const id = String(body.id || '').trim();
-  if (!id) return json({ error: '缺少板块 ID' }, 400);
-
-  const cards = await getJSON(env, 'cards', {});
-  const previous = cards[id] || {};
-
-  cards[id] = {
-    ...previous,
-    title: body.title ?? previous.title,
-    desc: body.desc ?? previous.desc,
-    titleI18n: body.titleI18n ?? previous.titleI18n,
-    descI18n: body.descI18n ?? previous.descI18n,
-    url: body.url ?? previous.url,
-    icon: body.icon ?? previous.icon,
-  };
-
-  await putJSON(env, 'cards', cards);
-  return json({ success: true, card: cards[id] });
 }
 
 /* ================= 更新日志 ================= */
@@ -571,6 +598,29 @@ async function handleChangelogsPatch(request, env, path) {
   logs[index].items = items;
   await putJSON(env, 'changelogs', logs);
   return json({ success: true, log: logs[index] });
+}
+
+/* ================= 公告 ================= */
+
+async function handleNoticesGet(env) {
+  const notices = await getJSON(env, 'notices', []);
+  return json({ success: true, data: notices });
+}
+
+async function handleNoticesPost(request, env) {
+  if (!(await requireAdmin(request, env))) {
+    return json({ success: false, message: '未授权或登录已过期' }, 401);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const notices = Array.isArray(body.notices) ? body.notices : null;
+
+  if (!notices) {
+    return json({ success: false, message: '数据格式错误' }, 400);
+  }
+
+  await putJSON(env, 'notices', notices);
+  return json({ success: true, message: '公告保存成功' });
 }
 
 /* ================= Bug ================= */
@@ -822,7 +872,7 @@ async function handleUserAvatarUpload(request, env) {
 
   await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
 
-  return json({ success: true, avatar: user.avatar });
+  return json({ success: true, avatar: user.avatar, user: publicUser(user) });
 }
 
 async function handleUserBackgroundUpload(request, env) {
@@ -844,7 +894,7 @@ async function handleUserBackgroundUpload(request, env) {
 
   await env.NAV_KV.put(userKey(user.id), JSON.stringify(user));
 
-  return json({ success: true, background: user.background });
+  return json({ success: true, background: user.background, user: publicUser(user) });
 }
 
 async function handleUserSearch(request, env, url) {
