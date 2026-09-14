@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>服务器导航面板 · v1.2</title>
-  <link rel="icon" href="resources/grassblock.webp" type="image/webp">
+  <link rel="icon" href="resource/grassblock.webp" type="image/webp">
   <style>
     :root {
       --bg-color: #0f172a;
@@ -132,7 +132,6 @@
       display: none;
     }
 
-    /* ===== 用户相关样式 ===== */
     .user-badge {
       display: flex;
       align-items: center;
@@ -181,7 +180,6 @@
       color: var(--text-main);
     }
 
-    /* 用户主页弹窗 */
     .profile-header {
       display: flex;
       flex-direction: column;
@@ -281,7 +279,6 @@
       background: rgba(99, 102, 241, 0.6);
     }
 
-    /* 登录/注册弹窗 */
     .auth-tabs {
       display: flex;
       gap: 0;
@@ -338,7 +335,6 @@
       display: none;
     }
 
-    /* 用户主页模态框 */
     .user-profile-modal .modal-card {
       max-width: 500px;
     }
@@ -662,7 +658,6 @@
     #otherSectionGroup { display: none; }
     #suggestionOtherSectionGroup { display: none; }
 
-    /* 文件上传 */
     .file-upload-wrapper {
       position: relative;
       overflow: hidden;
@@ -709,7 +704,6 @@
       white-space: nowrap;
     }
 
-    /* 用户主页按钮组 */
     .profile-actions {
       display: flex;
       gap: 8px;
@@ -723,7 +717,6 @@
       padding: 4px 12px;
     }
 
-    /* 响应式 */
     @media (max-width: 640px) {
       .top-nav {
         flex-wrap: wrap;
@@ -761,7 +754,6 @@
       <a class="nav-btn" href="/chat">聊天</a>
       <a class="nav-btn" href="/board">公告</a>
       <a class="nav-btn" href="/download">文件</a>
-      <!-- 用户信息区域 -->
       <div id="userArea">
         <span class="user-badge-login" onclick="openAuthModal()">登录 / 注册</span>
       </div>
@@ -790,28 +782,28 @@
       <div class="grid" id="gridWorld">
         <a href="" class="card" target="_blank" data-id="overworld" data-port="8080" data-path="/?world=minecraft_overworld&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'overworld')">编辑</button>
-          <div class="card-icon"><img src="resources/grassblock.webp" alt="主世界"></div>
+          <div class="card-icon"><img src="resource/grassblock.webp" alt="主世界"></div>
           <div class="card-info"><div class="card-title">主世界地图</div><div class="card-desc">Overworld Map</div></div>
           <span class="arrow">→</span>
         </a>
 
         <a href="" class="card" target="_blank" data-id="nether" data-port="8080" data-path="/?world=minecraft_the_nether&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'nether')">编辑</button>
-          <div class="card-icon"><img src="resources/netherrack.webp" alt="下界"></div>
+          <div class="card-icon"><img src="resource/netherrack.webp" alt="下界"></div>
           <div class="card-info"><div class="card-title">下界地图</div><div class="card-desc">Nether Map</div></div>
           <span class="arrow">→</span>
         </a>
 
         <a href="" class="card" target="_blank" data-id="end" data-port="8080" data-path="/?world=minecraft_the_end&zoom=4&x=0&z=0">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'end')">编辑</button>
-          <div class="card-icon"><img src="resources/BlockSprite_end-stone.webp" alt="末地"></div>
+          <div class="card-icon"><img src="resource/BlockSprite_end-stone.webp" alt="末地"></div>
           <div class="card-info"><div class="card-title">末地地图</div><div class="card-desc">End Map</div></div>
           <span class="arrow">→</span>
         </a>
 
         <a href="" class="card" target="_blank" data-id="transit" data-port="8888" data-path="/">
           <button class="edit-card-btn" onclick="openEditCardModal(event, 'transit')">编辑</button>
-          <div class="card-icon"><img src="resources/logo_5.png" alt="交通线路图"></div>
+          <div class="card-icon"><img src="resource/logo_5.png" alt="交通线路图"></div>
           <div class="card-info"><div class="card-title">交通线路图</div><div class="card-desc">Transit Network Map</div></div>
           <span class="arrow">→</span>
         </a>
@@ -878,7 +870,6 @@
     </main>
   </div>
 
-  <!-- 关于弹窗 -->
   <div class="modal-overlay" id="aboutModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -905,7 +896,6 @@
     </div>
   </div>
 
-  <!-- 更新日志弹窗 -->
   <div class="modal-overlay" id="changelogModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -931,7 +921,6 @@
     </div>
   </div>
 
-  <!-- Bug 汇报弹窗 -->
   <div class="modal-overlay" id="bugModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -998,7 +987,6 @@
     </div>
   </div>
 
-  <!-- 建议反馈弹窗 -->
   <div class="modal-overlay" id="suggestionModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -1065,7 +1053,6 @@
     </div>
   </div>
 
-  <!-- 编辑卡片弹窗 -->
   <div class="modal-overlay" id="editCardModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -1077,8 +1064,8 @@
         <div class="form-group" style="margin-bottom: 12px;">
           <label>板块名称 (标题)</label>
           <input type="text" id="editCardTitle" class="form-control" required>
-           <input type="text" id="editCardTitleEn" class="form-control" placeholder="English title">
-           <input type="text" id="editCardTitleTw" class="form-control" placeholder="繁體中文標題">
+          <input type="text" id="editCardTitleEn" class="form-control" placeholder="English title">
+          <input type="text" id="editCardTitleTw" class="form-control" placeholder="繁體中文標題">
         </div>
         <div class="form-group" style="margin-bottom: 12px;">
           <label>描述信息</label>
@@ -1088,18 +1075,17 @@
         </div>
         <div class="form-group" style="margin-bottom: 12px;">
           <label>跳转链接 URL</label>
-          <input type="url" id="editCardUrl" class="form-control" required>
+          <input type="text" id="editCardUrl" class="form-control" placeholder="例: /board 或 https://example.com" required>
         </div>
         <div class="form-group" style="margin-bottom: 16px;">
           <label>图标图片路径 (资源相对路径或图片 URL)</label>
-          <input type="text" id="editCardIcon" class="form-control" placeholder="例: resources/grassblock.webp">
+          <input type="text" id="editCardIcon" class="form-control" placeholder="例: resource/grassblock.webp">
         </div>
         <button type="submit" class="submit-btn">保存修改</button>
       </form>
     </div>
   </div>
 
-  <!-- ===== 用户认证弹窗 ===== -->
   <div class="modal-overlay" id="authModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -1115,7 +1101,6 @@
       <div id="authError" class="auth-error"></div>
       <div id="authSuccess" class="auth-success"></div>
 
-      <!-- 登录表单 -->
       <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label>用户名</label>
@@ -1128,7 +1113,6 @@
         <button type="submit" class="submit-btn">登录</button>
       </form>
 
-      <!-- 注册表单 -->
       <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
         <div class="form-group">
           <label>用户名 (至少3个字符)</label>
@@ -1151,7 +1135,6 @@
     </div>
   </div>
 
-  <!-- ===== 用户主页弹窗 ===== -->
   <div class="modal-overlay user-profile-modal" id="userProfileModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -1167,13 +1150,12 @@
             <div class="profile-username" id="profileUsername">@username</div>
             <div class="profile-bio" id="profileBio">这个人很懒，什么都没有写~</div>
             <div class="profile-stats">
-              <span>📅 加入: <span id="profileJoined">--</span></span>
-              <span>🕒 最后活跃: <span id="profileLastActive">--</span></span>
+              <span>?? 加入: <span id="profileJoined">--</span></span>
+              <span>?? 最后活跃: <span id="profileLastActive">--</span></span>
             </div>
           </div>
         </div>
 
-        <!-- 编辑区域（仅当前用户可见） -->
         <div id="profileEditArea" style="display: none; border-top: 1px solid var(--card-border); padding-top: 16px; margin-top: 4px;">
           <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-main);">编辑个人资料</h3>
           
@@ -1194,7 +1176,7 @@
               <label style="font-size: 0.8rem; color: var(--text-sub);">更换头像</label>
               <div class="file-upload-wrapper">
                 <div class="file-upload-label">
-                  <span>🖼️ 选择图片</span>
+                  <span>??? 选择图片</span>
                   <span class="file-name" id="avatarFileName">未选择</span>
                 </div>
                 <input type="file" id="avatarFileInput" accept="image/*" onchange="uploadAvatar(this)">
@@ -1204,7 +1186,7 @@
               <label style="font-size: 0.8rem; color: var(--text-sub);">更换背景</label>
               <div class="file-upload-wrapper">
                 <div class="file-upload-label">
-                  <span>📁 选择文件</span>
+                  <span>?? 选择文件</span>
                   <span class="file-name" id="bgFileName">未选择</span>
                 </div>
                 <input type="file" id="bgFileInput" accept="image/*,video/*" onchange="uploadBackground(this)">
@@ -1278,7 +1260,6 @@
       if (document.visibilityState !== 'hidden') checkUserSession();
     }, 10000);
 
-    // ===== 欢迎提示按钮函数 =====
     function showServerWelcome() {
       const input = document.getElementById('joinServerTextInput');
       input.value = siteConfig.joinServerText || '';
@@ -1310,7 +1291,6 @@
       alert('保存成功');
     });
 
-    // ===== 用户系统 =====
     async function checkUserSession() {
       try {
         const res = await fetch(`${API_BASE}/auth/me`, {
@@ -1336,8 +1316,8 @@
       if (user) {
         area.innerHTML = `
           <div class="user-badge" onclick="openUserProfile('${user.id}')">
-            <img class="user-badge-avatar" src="${user.avatar || '/uploads/default_avatar.png'}" alt="头像" 
-                 onerror="this.src='/uploads/default_avatar.png'">
+            <img class="user-badge-avatar" src="${user.avatar || '/api/uploads/default_avatar.png'}" alt="头像" 
+                 onerror="this.src='/api/uploads/default_avatar.png'">
             <span class="user-badge-name">${escapeHtml(user.displayName || user.username)}</span>
           </div>
         `;
@@ -1489,19 +1469,17 @@
     function renderUserProfile(user) {
       const isOwn = currentUserId === user.id;
       
-      document.getElementById('profileAvatar').src = user.avatar || '/uploads/default_avatar.png';
-      document.getElementById('profileAvatar').onerror = function() { this.src = '/uploads/default_avatar.png'; };
+      document.getElementById('profileAvatar').src = user.avatar || '/api/uploads/default_avatar.png';
+      document.getElementById('profileAvatar').onerror = function() { this.src = '/api/uploads/default_avatar.png'; };
       
       const bgImg = document.getElementById('profileBgImg');
-      if (user.background && user.background !== '/uploads/default_bg.png') {
+      if (user.background && user.background !== '/api/uploads/default_bg.png') {
         bgImg.src = user.background;
         bgImg.style.display = 'block';
         bgImg.onerror = function() { this.style.display = 'none'; };
-        // 如果是视频，用video标签
         if (user.background.match(/\.(mp4|webm|ogg|mov|avi)$/i)) {
           bgImg.style.display = 'none';
           const header = document.getElementById('profileHeader');
-          // 移除旧的video
           const oldVideo = header.querySelector('.profile-bg-video');
           if (oldVideo) oldVideo.remove();
           const video = document.createElement('video');
@@ -1531,7 +1509,6 @@
       const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString('zh-CN') : '--';
       document.getElementById('profileLastActive').textContent = lastActive;
 
-      // 编辑区域
       const editArea = document.getElementById('profileEditArea');
       if (isOwn) {
         editArea.style.display = 'block';
@@ -1589,7 +1566,6 @@
         const data = await res.json();
         if (res.ok) {
           alert('头像已更新！');
-          // 刷新用户信息
           const userRes = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
           if (userRes.ok) {
             const user = await userRes.json();
@@ -1645,7 +1621,6 @@
       input.value = '';
     }
 
-    // ===== 原有函数 =====
     function initCardLinks() {
       document.querySelectorAll('.card[data-port]').forEach(card => {
         const port = card.getAttribute('data-port');
@@ -1691,7 +1666,6 @@
             } else if (data.type === 'cards_updated') {
               fetchCards();
             } else if (data.type === 'user_updated') {
-              // 用户信息更新，刷新当前用户
               checkUserSession();
             }
           } catch (err) {
@@ -1767,6 +1741,7 @@
       e.preventDefault();
       e.stopPropagation();
       const cardEl = document.querySelector(`[data-id="${id}"]`);
+      if (!cardEl) return;
       document.getElementById('editCardId').value = id;
       const data = cardCustoms[id] || {};
       const defaults = cardDefaults[id] || {};
@@ -1776,10 +1751,10 @@
       document.getElementById('editCardDesc').value = data.desc || defaults.desc || cardEl.querySelector('.card-desc').innerText;
       document.getElementById('editCardDescEn').value = data.descI18n?.en || defaults.descEn || '';
       document.getElementById('editCardDescTw').value = data.descI18n?.['zh-TW'] || defaults.descTw || '';
-      document.getElementById('editCardUrl').value = cardEl.getAttribute('href');
+      document.getElementById('editCardUrl').value = cardEl.getAttribute('href') || data.url || '';
       
       const img = cardEl.querySelector('.card-icon img');
-      document.getElementById('editCardIcon').value = img ? img.getAttribute('src') : '';
+      document.getElementById('editCardIcon').value = img ? img.getAttribute('src') : (data.icon || '');
       
       openModal('editCardModal');
     }
@@ -1787,24 +1762,39 @@
     async function handleSaveCardEdit(e) {
       e.preventDefault();
       const id = document.getElementById('editCardId').value;
-      const title = document.getElementById('editCardTitle').value;
-      const desc = document.getElementById('editCardDesc').value;
+      const title = document.getElementById('editCardTitle').value.trim();
+      const desc = document.getElementById('editCardDesc').value.trim();
       const titleEn = document.getElementById('editCardTitleEn').value.trim();
       const titleTw = document.getElementById('editCardTitleTw').value.trim();
       const descEn = document.getElementById('editCardDescEn').value.trim();
       const descTw = document.getElementById('editCardDescTw').value.trim();
-      const url = document.getElementById('editCardUrl').value;
-      const icon = document.getElementById('editCardIcon').value;
+      const url = document.getElementById('editCardUrl').value.trim();
+      const icon = document.getElementById('editCardIcon').value.trim();
+
+      if (!id || !title || !url) {
+        alert('板块名称和跳转链接不能为空');
+        return;
+      }
 
       try {
         const res = await fetch(`${API_BASE}/cards`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${adminToken}`
           },
-          body: JSON.stringify({ id, title, desc, titleI18n: { en: titleEn, 'zh-TW': titleTw }, descI18n: { en: descEn, 'zh-TW': descTw }, url, icon })
+          body: JSON.stringify({
+            id,
+            title,
+            desc,
+            titleI18n: { en: titleEn, 'zh-TW': titleTw },
+            descI18n: { en: descEn, 'zh-TW': descTw },
+            url,
+            icon
+          })
         });
+
+        const data = await res.json().catch(() => ({}));
 
         if (res.status === 401) {
           alert('身份验证失效，请重新登录！');
@@ -1812,13 +1802,15 @@
           return;
         }
 
-        if (res.ok) {
+        if (res.ok && data.success) {
           closeModal('editCardModal');
+          await fetchCards();
+          alert('板块内容已保存！');
         } else {
-          alert('保存板块修改失败！');
+          alert('保存板块修改失败：' + (data.error || data.message || ('HTTP ' + res.status)));
         }
       } catch (err) {
-        alert('保存失败，请检查网络状态！');
+        alert('保存失败，请检查网络状态：' + err.message);
       }
     }
 
@@ -1841,12 +1833,12 @@
           }
           cardEl.setAttribute('href', cardUrl.toString());
         } catch (error) {
-          console.error(`卡片 ${id} 链接无效:`, error);
+          cardEl.setAttribute('href', data.url);
         }
       }
       if (data.icon) {
         const iconContainer = cardEl.querySelector('.card-icon');
-        iconContainer.innerHTML = `<img src="${data.icon}" alt="${data.title}">`;
+        iconContainer.innerHTML = `<img src="${data.icon}" alt="${data.title || ''}">`;
       }
     }
     function renderAllCardLanguages() {
@@ -1894,7 +1886,6 @@
       }
     }
 
-    // ===== Bug 相关函数 =====
     async function fetchBugs() {
       try {
         const res = await fetch(`${API_BASE}/bugs`);
@@ -1960,6 +1951,7 @@
         }
 
         if (!res.ok) throw new Error();
+        await fetchBugs();
       } catch (err) {
         alert('更新状态失败！');
       }
@@ -1994,7 +1986,6 @@
       `).join('');
     }
 
-    // ===== 建议相关函数 =====
     async function fetchSuggestions() {
       try {
         const res = await fetch(`${API_BASE}/suggestions`);
@@ -2033,6 +2024,7 @@
           document.getElementById('suggestionReporterName').value = reporterName;
           document.getElementById('suggestionDateTime').value = suggestionDateTime;
           toggleSuggestionOtherSectionInput('');
+          await fetchSuggestions();
         }
       } catch (err) {
         alert('提交失败，请检查网络！');
@@ -2057,6 +2049,7 @@
         }
 
         if (!res.ok) throw new Error();
+        await fetchSuggestions();
       } catch (err) {
         alert('更新状态失败！');
       }
@@ -2152,7 +2145,6 @@
       copySelectedContent(suggestionData, selectedSuggestionIds, '请先选择要复制的建议');
     });
 
-    // ===== 更新日志相关函数 =====
     async function fetchChangelogs() {
       try {
         const res = await fetch(`${API_BASE}/changelogs`);
@@ -2194,6 +2186,7 @@
           alert('更新日志发布成功！');
           document.getElementById('newVerTitle').value = '';
           document.getElementById('newVerContent').value = '';
+          await fetchChangelogs();
         }
       } catch (err) {
         alert('发布失败，请重试！');
