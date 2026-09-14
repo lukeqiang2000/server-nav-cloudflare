@@ -49,7 +49,7 @@ async function handleRequest(request, env) {
       return json({ error: '未绑定 KV 命名空间 NAV_KV 或 MY_KV' }, 500);
     }
 
-    if (path === 'login' && method === 'POST') return handleAdminLogin(request, env);
+    if ((path === 'login' || path === 'admin/login') && method === 'POST') return handleAdminLogin(request, env);
 
     if (path === 'site-config') {
       if (method === 'GET') return handleSiteConfigGet(env);
@@ -234,8 +234,15 @@ async function verifyAdminToken(token, env) {
 
 async function requireAdmin(request, env) {
   const auth = request.headers.get('Authorization') || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+  const token = auth.startsWith('Bearer ')
+    ? auth.slice(7).trim()
+    : getCookie(request, 'admin_token');
   return verifyAdminToken(token, env);
+}
+
+function adminCookie(token, url) {
+  const secure = url.protocol === 'https:' ? '; Secure' : '';
+  return `admin_token=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${ADMIN_TOKEN_MAX_AGE / 1000}${secure}`;
 }
 
 function getCookie(request, name) {
@@ -311,7 +318,9 @@ async function handleAdminLogin(request, env) {
   const ok = await verifyAdminPassword(password, env);
   if (!ok) return json({ error: '密码错误！' }, 401);
   const token = await createAdminToken(env);
-  return json({ success: true, token });
+  return json({ success: true, token }, 200, {
+    'Set-Cookie': adminCookie(token, new URL(request.url))
+  });
 }
 
 /* ================= SSE ================= */
